@@ -1,534 +1,455 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhareisBook | Biblioteca Híbrida</title>
+    <title>KhareisBook | Biblioteca Pessoal & Conhecimento Livre</title>
+    <meta name="description" content="Acervo de obras gratuitas e exclusivas. Conhecimento, filosofia e técnica.">
     
-    <!-- Ícone -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+    <!-- Ícone da Aba -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 
-    <!-- Fontes: Merriweather (Literária) & Inter (Moderna) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Merriweather (Literária) & Inter (Moderna) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;0,900;1,400&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            /* Cores e Planos */
-            --bg-body: #f0f2f5;
+            /* Paleta Identidade */
+            --bg-body: #f8f9fa;
             --paper: #ffffff;
             --ink: #1e293b;
-            
-            --gold: #d4af37; /* VIP/Admin */
-            --blue: #2563eb; /* Commerce */
-            --gray: #64748b; /* Padrão */
-            
-            --deep: #0f172a;
+            --gold: #d4af37;
+            --deep-blue: #0f172a;
+            --accent: #2563eb;
             --heart: #e11d48;
 
+            /* Tipografia */
             --font-serif: 'Merriweather', serif;
             --font-sans: 'Inter', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-body); color: var(--ink); font-family: var(--font-sans); padding-bottom: 80px; }
+        body { background-color: var(--bg-body); color: var(--ink); font-family: var(--font-sans); line-height: 1.6; padding-bottom: 80px; }
         
         h1, h2, h3, .brand { font-family: var(--font-serif); }
 
-        /* HEADER */
+        /* HEADER & HERO */
         header {
             background: var(--paper); border-bottom: 1px solid #e2e8f0;
             position: sticky; top: 0; z-index: 50; padding: 1rem 5%;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
-        .brand { font-weight: 900; font-size: 1.4rem; color: var(--deep); display: flex; align-items: center; gap: 8px; }
+        .brand { font-weight: 900; font-size: 1.4rem; color: var(--deep-blue); display: flex; align-items: center; gap: 10px; }
         .brand span { color: var(--gold); }
         
-        .btn-publish {
-            background: var(--deep); color: var(--gold); border: none;
-            padding: 8px 16px; border-radius: 4px; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; gap: 8px;
-            font-size: 0.9rem; transition: 0.2s;
+        .hero {
+            background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1507842217153-6932e00e57bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover; background-position: center;
+            color: white; padding: 4rem 5%; text-align: center;
         }
-        .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .hero h2 { font-size: 2.5rem; margin-bottom: 1rem; color: var(--gold); }
+        .hero p { max-width: 700px; margin: 0 auto 2rem auto; font-size: 1.1rem; opacity: 0.9; font-weight: 300; }
+        
+        /* FILTROS */
+        .nav-categories {
+            display: flex; gap: 10px; padding: 1rem 5%; overflow-x: auto;
+            background: var(--paper); border-bottom: 1px solid #e2e8f0; justify-content: center;
+        }
+        .pill {
+            padding: 6px 16px; border-radius: 50px; font-size: 0.9rem; cursor: pointer;
+            border: 1px solid #e2e8f0; transition: 0.3s; font-family: var(--font-serif); font-style: italic;
+        }
+        .pill:hover, .pill.active { background: var(--deep-blue); color: var(--gold); border-color: var(--deep-blue); }
 
-        /* HERO & INFO */
-        .shelf-info { text-align: center; padding: 3rem 1rem; background: var(--deep); color: white; margin-bottom: 2rem; }
-        .shelf-info h2 { color: var(--gold); margin-bottom: 10px; font-size: 2rem; }
-        .shelf-info p { opacity: 0.8; max-width: 600px; margin: 0 auto; font-weight: 300; }
-
-        /* GRID ESTANTE */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
-        .grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 2rem 1.5rem;
+        /* GRID ESTILO ESTANTE */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 5%; }
+        .shelf-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 2.5rem 1.5rem; margin-top: 1rem;
         }
 
         /* CARD DE LIVRO */
-        .book {
-            position: relative; perspective: 1000px; cursor: pointer;
+        .book-card {
+            background: transparent; perspective: 1000px; position: relative;
             transition: transform 0.3s;
         }
-        .book:hover { transform: translateY(-5px); }
+        .book-card:hover { transform: translateY(-5px); }
         
-        .cover-wrap {
-            aspect-ratio: 2/3; background: #ddd; border-radius: 4px 8px 8px 4px;
-            overflow: hidden; box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
-            position: relative; margin-bottom: 10px;
+        .cover-wrapper {
+            background: #eee; border-radius: 4px; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15), 3px 3px 5px rgba(0,0,0,0.1);
+            aspect-ratio: 2/3; position: relative; margin-bottom: 1rem;
         }
-        .book img { width: 100%; height: 100%; object-fit: cover; }
+        .cover-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Badges de Plano */
-        .badge {
-            position: absolute; top: 10px; right: 0; padding: 4px 10px;
-            color: white; font-weight: bold; font-size: 0.7rem; text-transform: uppercase;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.2); border-radius: 4px 0 0 4px;
+        /* Faixa Grátis/Pago */
+        .price-tag {
+            position: absolute; top: 10px; right: 0;
+            padding: 4px 12px; font-weight: 700; font-size: 0.8rem;
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
+            color: white; border-radius: 4px 0 0 4px;
         }
-        .b-permanent { background: var(--gold); color: black; }
-        .b-vip { background: linear-gradient(45deg, #FFD700, #FDB931); color: black; border: 1px solid white; }
-        .b-commerce { background: var(--blue); }
-        .b-padrao { background: var(--gray); }
-        
-        /* Pendente (Visual Admin) */
-        .book.pending { opacity: 0.7; }
-        .book.pending .cover-wrap::after {
-            content: 'AGUARDANDO APROVAÇÃO'; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(225, 29, 72, 0.8); color: white; display: flex;
-            align-items: center; justify-content: center; font-weight: bold; text-align: center; font-size: 0.8rem; padding: 10px;
-        }
+        .tag-free { background: var(--deep-blue); }
+        .tag-paid { background: var(--gold); color: black; }
 
-        .book-title { font-weight: 700; line-height: 1.2; font-size: 1rem; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
-        .book-author { font-size: 0.8rem; color: #64748b; font-style: italic; }
+        .book-info h3 { font-size: 1.1rem; line-height: 1.3; margin-bottom: 0.3rem; min-height: 2.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .book-info .author { font-size: 0.85rem; color: #64748b; font-style: italic; margin-bottom: 0.8rem; }
+        .book-desc { font-size: 0.85rem; color: #475569; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
+
+        /* Botões */
+        .btn-action {
+            display: block; width: 100%; padding: 10px; border-radius: 4px;
+            text-align: center; text-decoration: none; font-weight: bold; cursor: pointer; transition: 0.2s;
+            font-size: 0.9rem; border: none;
+        }
+        .btn-download { background: #e2e8f0; color: var(--deep-blue); }
+        .btn-download:hover { background: #cbd5e1; }
+        .btn-buy { background: var(--deep-blue); color: var(--gold); }
+        .btn-buy:hover { background: #000; }
+
+        /* Admin Controls */
+        .admin-controls { margin-top: 10px; display: flex; gap: 5px; }
+        .btn-sm { flex: 1; padding: 5px; font-size: 0.75rem; border-radius: 3px; border:none; cursor:pointer; color:white; }
+        .btn-edit { background: var(--accent); }
+        .btn-del { background: var(--heart); }
 
         /* MODAL */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.9); z-index: 100; align-items: center; justify-content: center; }
-        .modal-box { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); z-index: 1000; backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: var(--paper); width: 95%; max-width: 500px; padding: 2rem;
+            border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--deep-blue); font-size: 0.9rem; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: var(--font-sans); }
         
-        .step { display: none; } .step.active { display: block; }
-        
-        .form-group { margin-bottom: 12px; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        
-        /* Seleção de Planos */
-        .plan-cards { display: flex; gap: 10px; margin-bottom: 15px; }
-        .p-card { flex: 1; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 6px; cursor: pointer; transition: 0.2s; opacity: 0.6; }
-        .p-card.selected { border-color: var(--blue); background: #eff6ff; opacity: 1; transform: scale(1.05); font-weight: bold; }
-        
-        .btn-full { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-adm { background: var(--gold); color: black; margin-top: 5px; }
-        .btn-del { background: var(--heart); margin-top: 5px; }
+        .admin-badge { display: none; background: var(--heart); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; vertical-align: middle; }
 
-        /* Rodapé */
-        footer { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.8rem; margin-top: 4rem; border-top: 1px solid #e2e8f0; }
-        .admin-link { cursor: pointer; color: #cbd5e1; margin-left: 5px; }
-        .admin-bar { background: var(--deep); color: white; text-align: center; padding: 5px; font-size: 0.8rem; display: none; }
-        
-        /* Spinner */
-        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--gold); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        footer { text-align: center; padding: 3rem; background: var(--deep-blue); color: #94a3b8; font-size: 0.85rem; margin-top: 3rem; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--gold); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
-    <!-- BARRA DE ADMIN -->
-    <div id="adminBar" class="admin-bar">
-        🔓 MODO BIBLIOTECÁRIO ATIVO | <span onclick="Admin.logout()" style="text-decoration:underline; cursor:pointer;">Sair</span>
+    <!-- ADMIN LOGIN -->
+    <div id="admin-bar" style="display:none; background: #e11d48; color: white; padding: 8px; text-align: center; font-size: 0.8rem;">
+        🔓 MODO BIBLIOTECÁRIO (ADMIN) ATIVO | <span onclick="Admin.logout()" style="text-decoration:underline; cursor:pointer;">Sair</span>
     </div>
 
     <header>
         <div class="brand">
-            <i class="fas fa-university fa-lg"></i>
-            <div>Khareis<span>Book</span></div>
+            Khareis<span>Book</span> <span class="admin-badge">ADMIN</span>
         </div>
-        <button class="btn-publish" onclick="Modal.open()">
-            <i class="fas fa-plus-circle"></i> Publicar Obra
+        <button id="btnAdminAction" onclick="Admin.prompt()" style="background:transparent; border:1px solid #ccc; padding:6px 12px; border-radius:4px; font-size:0.8rem; cursor:pointer;">
+            Área Restrita
+        </button>
+        <!-- Botão Adicionar Oculto (Só Admin) -->
+        <button id="btnAddBook" onclick="Modal.open('upload')" style="display:none; background:var(--deep-blue); color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:10px;">
+            + Obra
         </button>
     </header>
 
-    <div class="shelf-info">
-        <h2>Acervo Vivo & Híbrido</h2>
-        <p>Explore a coleção permanente ou divulgue suas próprias obras e artigos para a comunidade.</p>
-        <!-- FILTROS -->
-        <div style="margin-top: 15px;">
-            <select id="filterSelect" onchange="App.load()" style="padding: 5px 10px; border-radius: 20px; border: none; font-family: var(--font-sans);">
-                <option value="todos">Todas as Obras</option>
-                <option value="permanent">🏛️ Acervo Permanente</option>
-                <option value="comunidade">👥 Da Comunidade</option>
-            </select>
-        </div>
+    <div class="hero">
+        <h2>Libertação Responsável</h2>
+        <p>Um acervo pessoal de conhecimento. Algumas obras são livres para o bem comum; outras sustentam a autonomia da criação.</p>
+        <button onclick="window.location.href='#catalog'" style="background:var(--gold); color:var(--deep-blue); border:none; padding:12px 30px; border-radius:2px; font-weight:900; font-family:var(--font-serif); cursor:pointer; font-size:1rem;">
+            EXPLORAR O ACERVO
+        </button>
     </div>
 
-    <div class="container">
-        <div id="gridBooks" class="grid">
-            <div class="spinner"></div>
+    <div class="nav-categories" id="filters">
+        <span class="pill active" onclick="App.filter('todos', this)">Todas as Obras</span>
+        <span class="pill" onclick="App.filter('livros', this)">Livros/PDFs</span>
+        <span class="pill" onclick="App.filter('artigos', this)">Artigos</span>
+        <span class="pill" onclick="App.filter('multimidia', this)">Multimídia</span>
+        <span class="pill" onclick="App.filter('gratis', this)">💎 Gratuitos</span>
+    </div>
+
+    <div id="catalog" class="container">
+        <div id="bookGrid" class="shelf-grid">
+            <div class="loader"></div>
         </div>
     </div>
 
     <footer>
-        <p>"O conhecimento é a única riqueza que cresce quando compartilhada."</p>
-        <p style="margin-top:10px;">&copy; 2025 KhareisBook • Hybrid System V2 <span class="admin-link" onclick="Admin.prompt()">🔒</span></p>
+        <p>"O conhecimento só é poder quando compartilhado."</p>
+        <br>
+        <p>&copy; 2025 KhareisBook • Biblioteca Independente</p>
+        <small style="opacity:0.5; margin-top:10px; display:block;">Plataforma Baseada em Classificados V4</small>
     </footer>
 
-    <!-- MODAL DE INTERAÇÃO -->
+    <!-- MODAL PRINCIPAL -->
     <div id="mainModal" class="modal">
         <div class="modal-box">
-            <span onclick="Modal.close()" style="position:absolute; right:15px; top:10px; font-size:1.5rem; cursor:pointer;">&times;</span>
-            
-            <!-- FORMULÁRIO DE PUBLICAÇÃO -->
-            <div id="formView" style="display:none;">
-                <h3 style="margin-bottom:15px;">Publicar na Estante</h3>
-                
-                <div class="form-group">
-                    <label style="font-weight:bold; font-size:0.9rem; display:block; margin-bottom:5px;">Escolha o Plano de Exposição:</label>
-                    <div class="plan-cards">
-                        <div class="p-card selected" onclick="Form.setPlan('vip', 10, this)">
-                            <div style="color:var(--gold)">VIP</div>
-                            <small>30 Dias</small><br>
-                            <strong>R$ 10</strong>
-                        </div>
-                        <div class="p-card" onclick="Form.setPlan('commerce', 6, this)">
-                            <div style="color:var(--blue)">COMM</div>
-                            <small>15 Dias</small><br>
-                            <strong>R$ 6</strong>
-                        </div>
-                        <div class="p-card" onclick="Form.setPlan('padrao', 3, this)">
-                            <div style="color:var(--gray)">STD</div>
-                            <small>7 Dias</small><br>
-                            <strong>R$ 3</strong>
-                        </div>
-                    </div>
-                    
-                    <!-- Opção Secreta de Admin -->
-                    <div id="adminPlanOption" style="display:none; text-align:center; background:#eee; padding:5px; margin-bottom:10px; border-radius:4px;">
-                        <label><input type="checkbox" id="chkPermanent" onchange="Form.togglePermanent()"> 🏛️ Tornar Permanente (Grátis/Acervo)</label>
-                    </div>
-                </div>
-
-                <div class="form-group"><input id="inpTitle" class="form-control" placeholder="Título da Obra / Artigo"></div>
-                <div class="form-group"><input id="inpAuthor" class="form-control" placeholder="Nome do Autor"></div>
-                <div class="form-group"><input id="inpLink" class="form-control" placeholder="Link do PDF/Arquivo (Drive/Dropbox)"></div>
-                <div class="form-group"><textarea id="inpDesc" class="form-control" rows="3" placeholder="Sinopse ou Breve Descrição..."></textarea></div>
-                <div class="form-group"><label>Capa (Imagem Vertical)</label><input type="file" id="inpCover" accept="image/*" class="form-control"></div>
-
-                <button class="btn-full" onclick="Form.submit()">Ir para Pagamento/Publicação</button>
-            </div>
-
-            <!-- TELA DE PIX -->
-            <div id="pixView" style="display:none; text-align:center;">
-                <h3 style="color:var(--blue)">Confirmação</h3>
-                <p>Para ativar sua publicação no plano <strong id="lblPlan"></strong>:</p>
-                
-                <div style="background:#f8f9fa; padding:15px; border:1px dashed #ccc; margin:15px 0; border-radius:8px;">
-                    <p>Valor: <strong id="lblPrice" style="font-size:1.4rem;"></strong></p>
-                    <p style="font-size:0.8rem; margin-top:5px;">Chave Pix (Celular):</p>
-                    <p style="font-family:monospace; font-size:1.1rem;">61 999487649</p>
-                </div>
-
-                <button class="btn-full" style="background:#25D366;" onclick="Form.finishPix()">
-                    <i class="fab fa-whatsapp"></i> Enviar Comprovante
-                </button>
-                <button class="btn-full" style="background:#ccc; color:#333;" onclick="Modal.close()">Cancelar</button>
-            </div>
-
-            <!-- DETALHES DO LIVRO (Leitura) -->
-            <div id="bookView" style="display:none;">
-                <div id="bookContent"></div>
-            </div>
-
+            <span onclick="Modal.close()" style="position:absolute; right:20px; top:15px; font-size:1.5rem; cursor:pointer;">&times;</span>
+            <h3 id="modalTitle" style="margin-bottom:20px; font-size:1.5rem; color:var(--deep-blue);">...</h3>
+            <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
         /**
-         * SISTEMA HÍBRIDO V2
+         * CONFIGURAÇÃO CENTRAL
          */
         const Config = {
-            dbUrl: "https://khareisbook-default-rtdb.firebaseio.com/library",
-            pixKey: "61 999487649",
-            adminPass: "khareis2025",
-            
-            plans: {
-                permanent: { days: 99999, price: 0, label: "🏛️ Acervo Permanente" },
-                vip:       { days: 30,    price: 10, label: "VIP (30 Dias)" },
-                commerce:  { days: 15,    price: 6,  label: "Commerce (15 Dias)" },
-                padrao:    { days: 7,     price: 3,  label: "Padrão (7 Dias)" }
-            }
+            // URL DO FIREBASE (Já com /books no final para organizar)
+            apiUrl: "https://khareisbook-default-rtdb.firebaseio.com/books", 
+            adminKey: "khareis2025", // Senha simples
+            pixKey: "61 999487649"   // Chave Pix
         };
 
         const Utils = {
             $: id => document.getElementById(id),
-            formatMoney: v => parseFloat(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),
+            currency: v => parseFloat(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
             
-            compress: file => new Promise(resolve => {
-                if(!file) resolve(null);
-                const r = new FileReader(); r.readAsDataURL(file);
-                r.onload = e => {
-                    const img = new Image(); img.src = e.target.result;
+            // Compressão de Imagem (Redimensiona capas para não pesar)
+            compressImage: file => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = e => {
+                    const img = new Image();
+                    img.src = e.target.result;
                     img.onload = () => {
-                        const c = document.createElement('canvas');
-                        const s = 300 / img.width; // Reduzir capa para 300px width
-                        c.width = 300; c.height = img.height * s;
-                        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-                        resolve(c.toDataURL('image/jpeg', 0.7));
-                    }
-                }
+                        const cvs = document.createElement('canvas');
+                        // Capa padrão livro proporção 2:3
+                        const scale = 400 / img.width; 
+                        cvs.width = 400; 
+                        cvs.height = img.height * scale;
+                        cvs.getContext('2d').drawImage(img, 0, 0, cvs.width, cvs.height);
+                        resolve(cvs.toDataURL('image/jpeg', 0.7));
+                    };
+                };
             })
         };
 
+        /**
+         * BANCO DE DADOS (REST API)
+         */
         const Db = {
-            list: async () => {
+            getBooks: async () => {
                 try {
-                    let r = await fetch(Config.dbUrl + ".json");
+                    let r = await fetch(Config.apiUrl + ".json");
                     let d = await r.json();
-                    return d ? Object.keys(d).map(k=>({...d[k], id:k})) : [];
-                } catch(e){ return []; }
+                    return d ? Object.keys(d).map(k => ({ ...d[k], id: k })) : [];
+                } catch (e) { return []; }
             },
-            create: async (data) => {
-                await fetch(Config.dbUrl + ".json", {method:'POST', body:JSON.stringify(data)});
+            addBook: async (data) => {
+                await fetch(Config.apiUrl + ".json", { method: 'POST', body: JSON.stringify(data) });
             },
-            updateStatus: async (id) => fetch(`${Config.dbUrl}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:'active'})}),
-            remove: async (id) => fetch(`${Config.dbUrl}/${id}.json`, {method:'DELETE'})
+            deleteBook: async (id) => {
+                await fetch(`${Config.apiUrl}/${id}.json`, { method: 'DELETE' });
+            }
         };
 
+        /**
+         * CONTROLE DE ACESSO (BIBLIOTECÁRIO)
+         */
         const Admin = {
-            check: () => {
-                if(sessionStorage.getItem('kb_adm')){
-                    Utils.$('adminBar').style.display='block';
-                    Utils.$('adminPlanOption').style.display='block'; // Mostra opção permanente no form
-                    return true;
-                }
-                return false;
-            },
-            prompt: () => {
-                if(prompt("Senha do Bibliotecário:") === Config.adminPass) {
-                    sessionStorage.setItem('kb_adm','true');
-                    location.reload();
-                }
-            },
-            logout: () => { sessionStorage.removeItem('kb_adm'); location.reload(); },
+            isLogged: () => sessionStorage.getItem('kb_admin') === 'true',
             
-            // Aprovar obra de usuário
-            approve: async (id) => {
-                if(confirm("Confirmar Pix e Publicar obra?")) {
-                    await Db.updateStatus(id);
-                    App.load();
+            prompt: () => {
+                if (Admin.isLogged()) return; // Já logado
+                let p = prompt("Acesso do Bibliotecário (Senha):");
+                if (p === Config.adminKey) {
+                    sessionStorage.setItem('kb_admin', 'true');
+                    location.reload();
+                } else if (p) {
+                    alert("Acesso negado.");
                 }
             },
-            delete: async (id) => {
-                if(confirm("Remover permanentemente?")) {
-                    await Db.remove(id);
-                    App.load();
+            
+            logout: () => {
+                sessionStorage.removeItem('kb_admin');
+                location.reload();
+            },
+
+            check: () => {
+                if (Admin.isLogged()) {
+                    Utils.$('admin-bar').style.display = 'block';
+                    Utils.$('btnAdminAction').style.display = 'none';
+                    Utils.$('btnAddBook').style.display = 'block';
+                    document.querySelectorAll('.admin-badge').forEach(e => e.style.display = 'inline-block');
                 }
             }
         };
 
+        /**
+         * LÓGICA DO APLICATIVO
+         */
         const App = {
             books: [],
-            
+            filterBy: 'todos',
+
             init: async () => {
                 Admin.check();
-                await App.load();
+                await App.loadShelf();
             },
 
-            load: async () => {
-                Utils.$('gridBooks').innerHTML = '<div class="spinner"></div>';
-                
-                let all = await Db.list();
-                const now = Date.now();
-                const isAdmin = Admin.check();
-                const filter = Utils.$('filterSelect').value;
+            loadShelf: async () => {
+                Utils.$('bookGrid').innerHTML = '<div class="loader"></div>';
+                App.books = await Db.getBooks();
+                App.render();
+            },
 
-                // 1. FAXINA AUTOMÁTICA
-                for(let b of all) {
-                    const days = Config.plans[b.plan]?.days || 7;
-                    const expireMs = days * 24 * 60 * 60 * 1000;
-                    
-                    // Se não for permanente e já venceu -> DELETA
-                    if(b.plan !== 'permanent' && (now - b.createdAt > expireMs)) {
-                        Db.remove(b.id); 
-                        continue;
-                    }
+            filter: (cat, el) => {
+                App.filterBy = cat;
+                document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+                App.render();
+            },
+
+            render: () => {
+                const grid = Utils.$('bookGrid');
+                grid.innerHTML = "";
+                
+                let list = App.books;
+
+                // Filtragem
+                if (App.filterBy === 'gratis') list = list.filter(b => b.price == 0);
+                else if (App.filterBy !== 'todos') list = list.filter(b => b.category === App.filterBy);
+
+                if (list.length === 0) {
+                    grid.innerHTML = '<div style="text-align:center; grid-column:1/-1; color:#999; padding:50px;">Ainda não há obras nesta prateleira.</div>';
+                    return;
                 }
 
-                // Recarrega lista limpa (simulação visual, na real o ideal seria filtrar local)
-                // Vamos apenas filtrar os deletados do array 'all'
-                all = all.filter(b => b.plan === 'permanent' || (now - b.createdAt <= (Config.plans[b.plan]?.days * 86400000)));
-
-                App.books = all; // Salva ref
-                
-                Utils.$('gridBooks').innerHTML = '';
-                
-                // 2. FILTRAR E RENDERIZAR
-                let toShow = [];
-                
-                all.forEach(b => {
-                    // Filtro de Admin (vê pendentes) vs Público (só ativos)
-                    if(b.status === 'pending' && !isAdmin) return; 
-
-                    // Filtros do Select
-                    if(filter === 'permanent' && b.plan !== 'permanent') return;
-                    if(filter === 'comunidade' && b.plan === 'permanent') return;
-
-                    toShow.push(b);
-                });
-
-                if(toShow.length === 0) Utils.$('gridBooks').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#888">Nenhuma obra encontrada.</p>';
-
-                // ORDENAR: Permanente primeiro, depois VIPs
-                toShow.sort((a,b) => {
-                    const w = {permanent:4, vip:3, commerce:2, padrao:1};
-                    return (w[b.plan] - w[a.plan]) || (b.createdAt - a.createdAt);
-                });
-
-                toShow.forEach(book => {
-                    // Badge Visual
-                    let badgeClass = 'b-padrao';
-                    let badgeText = 'Padrão';
+                list.forEach(book => {
+                    const isFree = parseFloat(book.price) === 0;
+                    const priceLabel = isFree ? "GRATUITO" : Utils.currency(book.price);
+                    const tagClass = isFree ? "tag-free" : "tag-paid";
                     
-                    if(book.plan === 'permanent') { badgeClass='b-permanent'; badgeText='🏛️ ACERVO'; }
-                    else if(book.plan === 'vip') { badgeClass='b-vip'; badgeText='⭐ VIP'; }
-                    else if(book.plan === 'commerce') { badgeClass='b-commerce'; badgeText='🚀 COMMERCE'; }
+                    // Ação do Botão
+                    const btnLabel = isFree ? `<i class="fas fa-download"></i> Baixar Agora` : `<i class="fas fa-shopping-cart"></i> Adquirir (${priceLabel})`;
+                    const btnClass = isFree ? `btn-download` : `btn-buy`;
+                    // Se for gratis, link direto. Se for pago, Modal Pix.
+                    const action = isFree 
+                        ? `window.open('${book.link}', '_blank')` 
+                        : `Modal.open('buy', '${book.id}')`;
 
-                    const img = book.cover || 'https://placehold.co/200x300?text=Sem+Capa';
-                    const isPending = book.status === 'pending';
-                    const pendingClass = isPending ? 'pending' : '';
+                    // Botões Admin
+                    let adminBtns = "";
+                    if (Admin.isLogged()) {
+                        adminBtns = `
+                            <div class="admin-controls">
+                                <button class="btn-sm btn-del" onclick="if(confirm('Remover obra do acervo?')) { Db.deleteBook('${book.id}').then(App.loadShelf); }">🗑️ Remover</button>
+                            </div>
+                        `;
+                    }
 
-                    let action = `Modal.showBook('${book.id}')`;
-                    // Se for admin, ao clicar num pendente, aprova
-                    
-                    const el = document.createElement('div');
-                    el.className = `book ${pendingClass}`;
-                    el.onclick = () => isPending && isAdmin ? null : Modal.showBook(book.id); 
-                    
-                    el.innerHTML = `
-                        <div class="cover-wrap">
-                            <span class="badge ${badgeClass}">${badgeText}</span>
-                            <img src="${img}" loading="lazy">
+                    const html = `
+                        <div class="book-card">
+                            <div class="cover-wrapper">
+                                <span class="price-tag ${tagClass}">${priceLabel}</span>
+                                <img src="${book.cover}" class="cover-img" alt="${book.title}" loading="lazy">
+                            </div>
+                            <div class="book-info">
+                                <h3>${book.title}</h3>
+                                <p class="author">por ${book.author}</p>
+                                <p class="book-desc">${book.desc}</p>
+                                <button onclick="${action}" class="btn-action ${btnClass}">${btnLabel}</button>
+                                ${adminBtns}
+                            </div>
                         </div>
-                        <div class="book-title">${book.title}</div>
-                        <div class="book-author">${book.author}</div>
-                        ${isPending && isAdmin ? `<button onclick="event.stopPropagation(); Admin.approve('${book.id}')" class="btn-full btn-adm">✅ Aprovar</button>` : ''}
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); Admin.delete('${book.id}')" class="btn-full btn-del" style="font-size:0.7rem;padding:5px;">🗑️</button>` : ''}
                     `;
-                    Utils.$('gridBooks').appendChild(el);
+                    grid.innerHTML += html;
                 });
             }
+        };
+
+        /**
+         * JANELAS E FORMULÁRIOS
+         */
+        const Modal = {
+            open: (type, bookId) => {
+                Utils.$('mainModal').style.display = 'flex';
+                const content = Utils.$('modalContent');
+                const title = Utils.$('modalTitle');
+
+                if (type === 'upload') {
+                    // FORMULÁRIO DE NOVO LIVRO
+                    title.innerText = "📚 Catalogar Nova Obra";
+                    content.innerHTML = `
+                        <div class="form-group"><label>Título da Obra</label><input id="upTitle" class="form-input" placeholder="Ex: O Manifesto"></div>
+                        <div class="form-group"><label>Autor</label><input id="upAuthor" class="form-input" value="Carlos A. Reis"></div>
+                        <div class="form-group"><label>Categoria</label>
+                            <select id="upCat" class="form-input">
+                                <option value="livros">Livro / PDF</option>
+                                <option value="artigos">Artigo Acadêmico</option>
+                                <option value="multimidia">Vídeo / Áudio</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Valor (0 para Grátis)</label><input id="upPrice" type="number" class="form-input" value="0"></div>
+                        <div class="form-group"><label>Link do Arquivo (Drive/Dropbox/Hospedagem)</label><input id="upLink" class="form-input" placeholder="https://..."></div>
+                        <div class="form-group"><label>Sinopse</label><textarea id="upDesc" class="form-input" rows="3"></textarea></div>
+                        <div class="form-group"><label>Capa (Imagem Vertical)</label><input id="upImg" type="file" accept="image/*" class="form-input"></div>
+                        <button onclick="Form.saveBook()" class="btn-action btn-buy">💾 Salvar no Acervo</button>
+                    `;
+                } 
+                else if (type === 'buy') {
+                    // CHECKOUT / COMPRA PIX
+                    const book = App.books.find(b => b.id === bookId);
+                    title.innerText = "🛒 Adquirir Obra";
+                    content.innerHTML = `
+                        <div style="text-align:center;">
+                            <img src="${book.cover}" style="height:150px; margin:0 auto 15px auto; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+                            <h4>${book.title}</h4>
+                            <p style="color:#666; margin-bottom:20px;">Investimento: <strong style="color:var(--deep-blue); font-size:1.2rem;">${Utils.currency(book.price)}</strong></p>
+                            
+                            <div style="background:#f1f5f9; padding:15px; border-radius:8px; border:1px dashed #cbd5e1; margin-bottom:20px;">
+                                <p style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; font-weight:bold;">Chave Pix</p>
+                                <p style="font-family:monospace; font-size:1.2rem; cursor:pointer;" onclick="navigator.clipboard.writeText('${Config.pixKey}');alert('Copiado!')">${Config.pixKey} <i class="far fa-copy"></i></p>
+                            </div>
+
+                            <p style="font-size:0.85rem; color:#475569; margin-bottom:15px;">Após o pagamento, envie o comprovante. O envio do arquivo é realizado diretamente pelo WhatsApp do Autor.</p>
+
+                            <button onclick="window.open('https://wa.me/55${Config.pixKey.replace(/ /g,'')}?text=Olá, quero adquirir a obra: ${book.title}. Segue meu comprovante.', '_blank')" class="btn-action" style="background:#25D366; color:white;">
+                                <i class="fab fa-whatsapp"></i> Enviar Comprovante
+                            </button>
+                        </div>
+                    `;
+                }
+            },
+            close: () => Utils.$('mainModal').style.display = 'none'
         };
 
         const Form = {
-            selPlan: 'vip',
-            selPrice: 10,
-            pendingData: null,
-
-            setPlan: (plan, price, el) => {
-                Form.selPlan = plan;
-                Form.selPrice = price;
-                document.querySelectorAll('.p-card').forEach(c=>c.classList.remove('selected'));
-                if(el) el.classList.add('selected');
-                Utils.$('chkPermanent').checked = false;
-            },
-
-            togglePermanent: () => {
-                const chk = Utils.$('chkPermanent').checked;
-                if(chk) {
-                    Form.selPlan = 'permanent';
-                    Form.selPrice = 0;
-                    document.querySelectorAll('.p-card').forEach(c=>c.classList.remove('selected'));
-                } else {
-                    // Reset to Default VIP
-                    Form.setPlan('vip', 10, document.querySelector('.p-card'));
-                }
-            },
-
-            submit: async () => {
-                const title = Utils.$('inpTitle').value;
-                if(!title) return alert("Título obrigatório!");
-
-                const imgFile = Utils.$('inpCover').files[0];
-                const imgData = await Utils.compress(imgFile);
-
-                Form.pendingData = {
-                    title: title,
-                    author: Utils.$('inpAuthor').value || "Anônimo",
-                    link: Utils.$('inpLink').value,
-                    desc: Utils.$('inpDesc').value,
-                    cover: imgData,
-                    plan: Form.selPlan,
-                    price: Form.selPrice,
-                    createdAt: Date.now(),
-                    status: (Form.selPlan === 'permanent') ? 'active' : 'pending' // Admin publica direto
+            saveBook: async () => {
+                const imgFile = Utils.$('upImg').files[0];
+                if (!imgFile) return alert("A capa é obrigatória!");
+                
+                const coverData = await Utils.compressImage(imgFile);
+                
+                const data = {
+                    title: Utils.$('upTitle').value,
+                    author: Utils.$('upAuthor').value,
+                    category: Utils.$('upCat').value,
+                    price: Utils.$('upPrice').value,
+                    link: Utils.$('upLink').value, // Para grátis vai direto, para pagos é só ref interno
+                    desc: Utils.$('upDesc').value,
+                    cover: coverData,
+                    createdAt: Date.now()
                 };
 
-                // Se for Grátis/Permanente (Admin), salva direto. Se for pago, cobra Pix.
-                if(Form.selPrice === 0) {
-                    await Db.create(Form.pendingData);
-                    Modal.close();
-                    App.load();
-                    alert("Obra publicada no Acervo!");
-                } else {
-                    Utils.$('formView').style.display='none';
-                    Utils.$('pixView').style.display='block';
-                    Utils.$('lblPlan').innerText = Config.plans[Form.selPlan].label;
-                    Utils.$('lblPrice').innerText = Utils.formatMoney(Form.selPrice);
-                }
-            },
-
-            finishPix: async () => {
-                // Salva como pendente
-                await Db.create(Form.pendingData);
-                const title = Form.pendingData.title;
-                const price = Utils.formatMoney(Form.pendingData.price);
+                // Feedback
+                Utils.$('modalContent').innerHTML = '<div class="loader"></div><p style="text-align:center">Catalogando...</p>';
                 
-                // Manda pro Zap
-                const msg = `Olá! Quero publicar a obra: "${title}" (${Form.pendingData.plan}). Valor: ${price}. Segue comprovante.`;
-                window.open(`https://wa.me/55${Config.pixKey.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                await Db.addBook(data);
                 
                 Modal.close();
-                alert("Obra enviada para aprovação!");
-                location.reload(); // Para limpar o form
+                App.loadShelf();
             }
-        };
-
-        const Modal = {
-            open: () => {
-                Utils.$('mainModal').style.display = 'flex';
-                Utils.$('formView').style.display = 'block';
-                Utils.$('pixView').style.display = 'none';
-                Utils.$('bookView').style.display = 'none';
-                // Reset basic inputs would go here
-            },
-            showBook: (id) => {
-                const book = App.books.find(b => b.id === id);
-                if(!book) return;
-
-                Utils.$('mainModal').style.display = 'flex';
-                Utils.$('formView').style.display = 'none';
-                Utils.$('pixView').style.display = 'none';
-                Utils.$('bookView').style.display = 'block';
-
-                const btnTxt = book.link ? "⬇️ Acessar / Baixar" : "💬 Contatar Autor";
-                const action = book.link 
-                    ? `window.open('${book.link}','_blank')`
-                    : `window.open('https://wa.me/55${Config.pixKey.replace(/ /g,'')}?text=Interesse na obra ${book.title}','_blank')`; // Fallback to admin contact
-
-                Utils.$('bookContent').innerHTML = `
-                    <div style="text-align:center">
-                        <img src="${book.cover || ''}" style="max-height:200px; box-shadow:0 5px 15px rgba(0,0,0,0.3); margin-bottom:20px; border-radius:4px;">
-                        <h2 style="margin-bottom:5px;">${book.title}</h2>
-                        <p style="color:#666; font-style:italic;">Por ${book.author}</p>
-                        <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
-                        <p style="text-align:left; line-height:1.6; color:#333; margin-bottom:20px;">${book.desc}</p>
-                        
-                        <button onclick="${action}" class="btn-full" style="background:var(--deep); border-radius:30px;">
-                            ${btnTxt}
-                        </button>
-                    </div>
-                `;
-            },
-            close: () => Utils.$('mainModal').style.display = 'none'
         };
 
         // Iniciar
