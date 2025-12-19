@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhareisBook | Acervo Colaborativo</title>
+    <title>KhareisBook | Biblioteca Gold</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;0,900;1,400&display=swap" rel="stylesheet">
@@ -11,230 +11,264 @@
 
     <style>
         :root {
-            /* Identidade V1 Classic */
-            --bg: #f8f9fa;
+            --bg: #fdfbf7; /* Tom papel antigo suave */
             --paper: #ffffff;
-            --ink: #1e293b;
-            --gold: #d4af37;
             --deep: #0f172a;
+            --gold: #d4af37;
             --green: #15803d;
-            --font-serif: 'Merriweather', serif;
-            --font-sans: 'Inter', sans-serif;
+            --heart: #e11d48;
+            --text: #334155;
+            
+            --serif: 'Merriweather', serif;
+            --sans: 'Inter', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg); color: var(--ink); font-family: var(--font-sans); padding-bottom: 80px; }
-        
-        h1, h2, h3, .brand { font-family: var(--font-serif); }
+        body { background-color: var(--bg); color: var(--text); font-family: var(--sans); padding-bottom: 80px; }
+        h1, h2, h3, .brand, .hero h2 { font-family: var(--serif); }
 
+        /* BARRA ADMIN (CORRIGIDA) */
+        .admin-bar { 
+            background: var(--heart); color: white; padding: 8px; 
+            text-align: center; font-size: 0.85rem; font-weight: bold; letter-spacing: 0.5px;
+            display: none; /* Ativa via JS */
+        }
+
+        /* HEADER */
         header {
             background: var(--paper); border-bottom: 1px solid #e2e8f0;
-            position: sticky; top: 0; z-index: 50; padding: 1rem 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); sticky; top:0; z-index: 50;
         }
-        .brand { font-weight: 900; font-size: 1.4rem; color: var(--deep); display: flex; align-items: center; gap: 8px; }
+        .brand { font-weight: 900; font-size: 1.5rem; color: var(--deep); display: flex; align-items: center; gap: 10px; }
         .brand span { color: var(--gold); }
         
         .btn-pub {
-            background: var(--deep); color: white; border: none; padding: 8px 20px;
-            border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;
-            font-size: 0.9rem; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: var(--deep); color: white; border: none; padding: 10px 24px;
+            border-radius: 2px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
         }
-        .btn-pub:hover { background: var(--gold); color: var(--deep); transform: translateY(-2px); }
+        .btn-pub:hover { background: var(--gold); color: var(--deep); }
 
-        /* HERO */
-        .hero {
-            background: linear-gradient(rgba(15,23,42,0.9), rgba(15,23,42,0.85)), url('https://images.unsplash.com/photo-1507842217153-6932e00e57bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover; background-position: center;
-            color: white; padding: 4rem 5%; text-align: center;
+        /* FILTROS E CATEGORIAS (RECUPERADOS) */
+        .nav-categories {
+            background: white; padding: 15px 5%; border-bottom: 1px solid #eee;
+            display: flex; gap: 10px; overflow-x: auto;
         }
-        .hero h2 { font-size: 2.2rem; color: var(--gold); margin-bottom: 10px; }
-        .hero p { max-width: 700px; margin: 0 auto; font-size: 1.1rem; opacity: 0.9; font-weight: 300; font-style: italic; }
+        .pill {
+            padding: 6px 18px; border-radius: 50px; font-size: 0.85rem; cursor: pointer;
+            border: 1px solid #e2e8f0; transition: 0.3s; white-space: nowrap;
+            color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 5px;
+        }
+        .pill:hover, .pill.active { background: var(--deep); color: var(--gold); border-color: var(--deep); }
+        .pill i { font-size: 0.9em; }
 
-        /* ESTANTE */
+        /* GRID */
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem 5%; }
         .grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 2.5rem 1.5rem;
+            gap: 3rem 2rem;
         }
 
-        .book { background: transparent; perspective: 1000px; position: relative; transition: transform 0.3s; }
+        /* CARD CLASSICO */
+        .book { position: relative; perspective: 1000px; cursor: pointer; transition: transform 0.3s; }
         .book:hover { transform: translateY(-5px); }
         
         .cover-box {
-            background: #eee; border-radius: 4px; overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15), 3px 3px 5px rgba(0,0,0,0.1);
-            aspect-ratio: 2/3; position: relative; margin-bottom: 1rem; cursor: pointer;
+            background: #e2e8f0; border-radius: 2px; overflow: hidden;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+            aspect-ratio: 2/3; position: relative; margin-bottom: 1rem;
         }
         .cover-box img { width: 100%; height: 100%; object-fit: cover; }
         
-        .price-tag {
+        .price-badge {
             position: absolute; top: 10px; right: 0; padding: 4px 12px;
-            font-weight: 700; font-size: 0.8rem; box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
-            color: white; border-radius: 4px 0 0 4px;
+            font-weight: 700; font-size: 0.75rem; box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
+            color: white; border-radius: 4px 0 0 4px; font-family: var(--sans);
         }
-        .t-free { background: var(--deep); }
-        .t-paid { background: var(--gold); color: black; }
+        .free { background: var(--deep); }
+        .paid { background: var(--gold); color: black; }
 
-        .b-title { font-size: 1.1rem; line-height: 1.3; font-weight: 700; color: var(--deep); margin-bottom: 5px; }
-        .b-author { font-size: 0.85rem; color: #64748b; font-style: italic; margin-bottom: 10px; }
+        .b-title { font-family: var(--serif); font-weight: 700; font-size: 1.1rem; line-height: 1.3; color: var(--deep); margin-bottom: 5px; }
+        .b-author { font-size: 0.85rem; color: #64748b; font-style: italic; margin-bottom: 12px; }
         
-        .btn-action {
-            display: block; width: 100%; padding: 10px; border-radius: 4px;
-            text-align: center; text-decoration: none; font-weight: bold; cursor: pointer;
-            border: none; font-size: 0.9rem;
+        /* Botões do Card */
+        .btn-card {
+            display: block; width: 100%; padding: 8px; border-radius: 2px;
+            text-align: center; font-weight: bold; cursor: pointer; border: none;
+            font-size: 0.8rem; text-transform: uppercase;
         }
-        .btn-free { background: #e2e8f0; color: var(--deep); }
-        .btn-pay { background: var(--deep); color: var(--gold); }
+        .card-buy { background: var(--deep); color: var(--gold); }
+        .card-get { background: #e2e8f0; color: var(--deep); }
+
+        /* FOOTER & CONTADOR */
+        footer { text-align: center; margin-top: 4rem; padding: 3rem; background: var(--deep); color: #94a3b8; font-size: 0.9rem; }
+        .visit-counter { 
+            display: inline-block; background: rgba(255,255,255,0.1); 
+            padding: 5px 15px; border-radius: 20px; margin-top: 15px; 
+            font-family: monospace; color: var(--gold);
+        }
 
         /* MODAL */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: var(--paper); width: 95%; max-width: 500px; padding: 2rem; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.95); z-index: 100; align-items: center; justify-content: center; }
+        .modal-box { background: var(--paper); width: 95%; max-width: 500px; padding: 2.5rem; border-radius: 4px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; right: 15px; top: 10px; font-size: 1.5rem; cursor: pointer; color: #ccc; }
         
-        .form-label { display: block; margin: 10px 0 5px; font-weight: 600; color: var(--deep); font-size: 0.9rem; }
-        .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; }
-        .info-box { background: #f0fdf4; border: 1px dashed var(--green); padding: 10px; border-radius: 4px; margin-top: 5px; font-size: 0.85rem; color: #166534; }
-
-        /* ADMIN & FOOTER */
-        .admin-bar { background: var(--heart); color: white; padding: 10px; text-align: center; font-size: 0.9rem; display: none; font-weight: bold; position: sticky; top:0; z-index:60; width:100%; }
+        .f-label { display: block; margin: 12px 0 5px; font-weight: bold; color: var(--deep); font-size: 0.9rem; }
+        .f-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-family: var(--sans); }
         
-        footer { text-align: center; margin-top: 3rem; padding: 2rem; border-top: 1px solid #e2e8f0; color: #94a3b8; }
-        .visit-box { display: inline-block; background: #eee; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-top: 10px; font-weight: bold; color: var(--deep); }
+        /* Painel Financeiro Visual */
+        .finance-panel {
+            background: #f0fdf4; border: 1px dashed var(--green);
+            padding: 15px; border-radius: 4px; margin-top: 10px;
+            font-size: 0.9rem; color: #166534;
+        }
 
-        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--gold); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 30px auto; }
+        .btn-main { width: 100%; padding: 15px; background: var(--green); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 20px; }
+        .btn-pay { background: var(--deep); color: var(--gold); }
+
+        .loader { border: 3px solid #eee; border-top: 3px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- A BARRA DE ADMIN VOLTOU -->
-    <div id="adminBar" class="admin-bar">🔓 MODO BIBLIOTECÁRIO (ADMIN) ATIVO | <span onclick="Admin.logout()" style="text-decoration:underline; cursor:pointer">Sair</span></div>
+    <!-- BARRA ADMIN (Recuperada) -->
+    <div id="adminBar" class="admin-bar">
+        🔓 MODO BIBLIOTECÁRIO (ADMIN) ATIVO | <span onclick="Admin.logout()" style="text-decoration:underline; cursor:pointer;">SAIR</span>
+    </div>
 
     <header>
-        <div class="brand"><i class="fas fa-book-reader"></i> Khareis<span>Book</span></div>
-        <div>
-            <button onclick="Modal.openPub()" class="btn-pub"><i class="fas fa-plus"></i> Publicar Obra</button>
-        </div>
+        <div class="brand"><i class="fas fa-university"></i> Khareis<span>Book</span></div>
+        <button onclick="Modal.openPub()" class="btn-pub"><i class="fas fa-plus-circle"></i> Publicar Obra</button>
     </header>
 
-    <div class="hero">
-        <h2>Libertação Responsável</h2>
-        <p>"Compartilhar conhecimento é a única forma de atingir a imortalidade intelectual."</p>
+    <!-- NAVEGAÇÃO DE CATEGORIAS (Recuperada) -->
+    <div class="nav-categories">
+        <div class="pill active" onclick="App.filter('all', this)">Todas</div>
+        <div class="pill" onclick="App.filter('livros', this)"><i class="fas fa-book"></i> Livros/PDFs</div>
+        <div class="pill" onclick="App.filter('artigos', this)"><i class="fas fa-scroll"></i> Artigos</div>
+        <div class="pill" onclick="App.filter('multimidia', this)"><i class="fas fa-video"></i> Multimídia</div>
+        <div style="width:1px; background:#eee; margin:0 5px;"></div>
+        <div class="pill" onclick="App.filter('community', this)"><i class="fas fa-users"></i> Comunidade</div>
     </div>
 
     <div class="container">
-        <!-- FILTRO DE TIPO SIMPLES -->
-        <div style="text-align:right; margin-bottom:20px;">
-            <select id="filterType" onchange="App.load()" style="padding:5px; border:1px solid #ccc; border-radius:4px;">
-                <option value="all">Todas as Obras</option>
-                <option value="khareis">👑 Acervo Khareis</option>
-                <option value="community">👤 Da Comunidade</option>
-            </select>
-        </div>
-
         <div id="grid" class="grid">
-            <div class="spinner"></div>
+            <div class="loader"></div>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2025 KhareisBook • <span onclick="Admin.login()" style="cursor:pointer">Admin</span></p>
-        <div class="visit-box"><i class="fas fa-eye"></i> <span id="visitCount">...</span></div>
+        <h2 style="color:white; margin-bottom:10px;">KhareisBook</h2>
+        <p>"Onde o conhecimento encontra a liberdade."</p>
+        <div class="visit-counter"><i class="fas fa-eye"></i> <span id="visitCount">...</span></div>
+        <p style="margin-top:20px; font-size:0.75rem; cursor:pointer; opacity:0.5;" onclick="Admin.login()">Acesso Administrativo</p>
     </footer>
 
-    <!-- MODAL ÚNICO E DINÂMICO -->
+    <!-- MODAL ÚNICO E INTELIGENTE -->
     <div id="modal" class="modal">
         <div class="modal-box">
-            <span onclick="Modal.close()" style="position:absolute; right:15px; top:10px; font-size:1.5rem; cursor:pointer; color:#999">&times;</span>
+            <span class="close-modal" onclick="Modal.close()">&times;</span>
             
-            <!-- FORMULÁRIO DE PUBLICAÇÃO -->
-            <div id="viewForm" style="display:none;">
-                <h3 style="color:var(--deep); margin-bottom:10px;">Publicar Obra</h3>
-                <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">
-                    Taxa única de catalogação: <strong>R$ 10,00</strong>.<br>
-                    Se vender, 10% fica para a plataforma e 90% vai para você.
-                </p>
+            <!-- 1. FORMULÁRIO DE PUBLICAÇÃO -->
+            <div id="screenUpload" style="display:none;">
+                <h2 style="color:var(--deep); margin-bottom:5px;">Publicar Obra</h2>
+                <p style="color:#666; font-size:0.9rem;">Taxa de Catalogação: <strong>R$ 10,00</strong> (Vitalício)</p>
 
-                <label class="form-label">Título da Obra</label>
-                <input id="inpTitle" class="form-input">
+                <label class="f-label">Categoria</label>
+                <select id="inpCat" class="f-input">
+                    <option value="livros">Livro / PDF</option>
+                    <option value="artigos">Artigo Acadêmico</option>
+                    <option value="multimidia">Vídeo / Áudio / Link</option>
+                </select>
 
-                <label class="form-label">Nome do Autor</label>
-                <input id="inpAuthor" class="form-input">
+                <label class="f-label">Título</label>
+                <input id="inpTitle" class="f-input">
 
-                <label class="form-label">Sinopse</label>
-                <textarea id="inpDesc" class="form-input" rows="3"></textarea>
+                <label class="f-label">Autor</label>
+                <input id="inpAuthor" class="f-input">
 
-                <label class="form-label">Link do Arquivo (PDF, Drive...)</label>
-                <input id="inpLink" class="form-input" placeholder="Obrigatório para envio">
+                <label class="f-label">Sinopse</label>
+                <textarea id="inpDesc" class="f-input" rows="3"></textarea>
 
-                <label class="form-label" style="color:var(--deep)">Preço de Venda (Para o Leitor)</label>
-                <input id="inpPrice" type="number" class="form-input" placeholder="0 = Gratuito" onkeyup="Form.calc()">
+                <label class="f-label">Link do Arquivo (Drive/Dropbox/YouTube)</label>
+                <input id="inpLink" class="f-input" placeholder="Cole aqui o link direto">
+
+                <label class="f-label" style="color:var(--deep)">Preço de Venda (Seu Lucro)</label>
+                <input id="inpPrice" type="number" class="f-input" placeholder="0 = Gratuito" onkeyup="Form.calc()">
                 
-                <div id="authPixBox" class="info-box" style="display:none;">
-                    <span>Sua parte (90%): <strong id="valAuth">R$ 0,00</strong></span><br>
-                    <span>Comissão Khareis (10%): <strong id="valPlat">R$ 0,00</strong></span>
-                    <input id="inpPixKey" class="form-input" placeholder="Sua Chave PIX para receber" style="margin-top:5px; background:white;">
+                <div id="financeBox" class="finance-panel" style="display:none;">
+                    <span>Venda: <strong id="showPrice">R$ 0,00</strong></span><br>
+                    <span>Sua Parte (90%): <strong id="showShare" style="font-size:1.1rem; color:#166534">R$ 0,00</strong></span>
+                    <input id="inpPixKey" class="f-input" placeholder="Sua Chave PIX para receber" style="margin-top:8px; background:white; border-color:#86efac;">
                 </div>
 
-                <label class="form-label">Capa</label>
-                <input type="file" id="inpCover" accept="image/*" class="form-input">
+                <label class="f-label">Capa (Imagem Vertical)</label>
+                <input type="file" id="inpCover" accept="image/*" class="f-input">
 
-                <button class="btn-action btn-pay" style="margin-top:15px;" onclick="Form.submit()">Continuar</button>
+                <button class="btn-main btn-pay" onclick="Form.submit()">CONTINUAR & PAGAR TAXA</button>
             </div>
 
-            <!-- TELA DE PAGAMENTO DA TAXA (Para quem posta) -->
-            <div id="viewFee" style="display:none; text-align:center;">
-                <h3>Pagamento da Taxa</h3>
-                <p style="color:#666;">Para catalogar sua obra, pague a taxa única.</p>
-                <div style="background:#f1f5f9; padding:20px; border-radius:8px; margin:20px 0;">
-                    <p>Valor: <strong style="font-size:1.5rem; color:var(--deep)">R$ 10,00</strong></p>
-                    <p style="margin-top:5px;">Chave Pix:</p>
-                    <code style="background:white; padding:5px; border:1px solid #ccc;">61 999487649</code>
+            <!-- 2. TELA DE PAGAMENTO DA TAXA (R$10) -->
+            <div id="screenFee" style="display:none; text-align:center;">
+                <h3 style="color:var(--deep)">Taxa de Catalogação</h3>
+                <p style="margin-bottom:20px; color:#666;">Para ativar sua obra permanentemente.</p>
+                
+                <div style="background:#f8fafc; padding:20px; border:1px solid #e2e8f0; border-radius:8px;">
+                    <p style="font-size:2rem; font-weight:bold; color:var(--deep);">R$ 10,00</p>
+                    <p style="font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; margin-top:10px;">Chave Pix</p>
+                    <code style="background:white; padding:5px 15px; border:1px solid #ccc; font-size:1.2rem; cursor:pointer;" onclick="Utils.copy('61 999487649')">61 999487649</code>
+                    <p style="font-size:0.7rem; color:#999; margin-top:5px;">(Clique para copiar)</p>
                 </div>
-                <button class="btn-action" style="background:#25D366; color:white;" onclick="Form.confirm()">
-                    <i class="fab fa-whatsapp"></i> Enviar Comprovante
+
+                <button class="btn-main" onclick="Form.confirmUpload()">
+                    <i class="fab fa-whatsapp"></i> ENVIAR COMPROVANTE
                 </button>
             </div>
 
-            <!-- TELA DE COMPRA DO CLIENTE (RECUPERADA) -->
-            <div id="viewBuy" style="display:none; text-align:center;">
-                <h3 style="color:var(--deep);">Adquirir Obra</h3>
-                <img id="buyCover" src="" style="height:100px; margin:10px auto; border-radius:4px;">
-                <h4 id="buyTitle" style="color:var(--gold);"></h4>
+            <!-- 3. TELA DE COMPRA (Leitor comprando obra) -->
+            <div id="screenBuy" style="display:none; text-align:center;">
+                <h3 style="color:var(--deep); margin-bottom:15px;">Adquirir Obra</h3>
+                <img id="buyCover" src="" style="height:120px; border-radius:4px; box-shadow:0 5px 10px rgba(0,0,0,0.1);">
+                <h4 id="buyTitle" style="color:var(--gold); margin:10px 0; font-family:var(--serif);"></h4>
                 
-                <div style="background:#fffbeb; padding:20px; border-radius:8px; border:1px dashed #d4af37; margin:20px 0;">
-                    <p>Investimento: <strong id="buyPrice" style="font-size:1.6rem; color:var(--deep)"></strong></p>
-                    <hr style="margin:10px 0; border-top:1px solid #ddd;">
-                    <p style="font-size:0.9rem;">Chave Pix (Khareis):</p>
-                    <code style="background:white; padding:5px 15px; border:1px solid #ccc; font-weight:bold; font-size:1.1rem;">61 999487649</code>
+                <div style="background:#fffbeb; padding:20px; border:1px dashed #d4af37; border-radius:8px; margin-bottom:20px;">
+                    <p style="color:#92400e; font-size:0.9rem;">Investimento Total</p>
+                    <p id="buyVal" style="font-size:1.8rem; font-weight:bold; color:var(--deep);"></p>
+                    <hr style="margin:10px 0; opacity:0.3;">
+                    <p style="font-size:0.9rem;">Chave Pix do Sistema:</p>
+                    <code style="background:white; padding:5px; font-weight:bold; color:#333;">61 999487649</code>
                 </div>
 
-                <p style="font-size:0.8rem; color:#666; margin-bottom:15px;">Após o pagamento, o envio é feito diretamente pelo WhatsApp do Autor.</p>
+                <p style="font-size:0.8rem; color:#666; margin-bottom:15px;">Após o pagamento, o Administrador repassa a parte do autor e libera o download.</p>
 
-                <button id="btnBuyConfirm" class="btn-action" style="background:#25D366; color:white; font-size:1rem; padding:15px;">
-                    <i class="fab fa-whatsapp"></i> Enviar Comprovante
+                <button id="btnBuyConfirm" class="btn-main">
+                    <i class="fab fa-whatsapp"></i> ENVIAR COMPROVANTE E RECEBER
                 </button>
             </div>
 
-            <!-- TELA DE DETALHES/BAIXAR -->
-            <div id="viewBook" style="display:none; text-align:center;">
-                <div id="bookDetails"></div>
+            <!-- 4. TELA DE DETALHES/DOWNLOAD -->
+            <div id="screenBook" style="display:none; text-align:center;">
+                <div id="bookDetailContent"></div>
             </div>
+
         </div>
     </div>
 
     <script>
+        /* SETUP */
         const Config = {
-            db: "https://khareisbook-default-rtdb.firebaseio.com/shelf",
+            db: "https://khareisbook-default-rtdb.firebaseio.com/shelf", 
             pix: "61 999487649",
             pass: "khareis2025",
-            fee: 10 
+            fee: 10
         };
 
         const Utils = {
             $: i => document.getElementById(i),
             money: v => parseFloat(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),
+            copy: t => { navigator.clipboard.writeText(t); alert("Chave Copiada!"); },
             compress: f => new Promise(r => {
                 if(!f) r(null);
                 let rd = new FileReader(); rd.readAsDataURL(f);
@@ -250,241 +284,278 @@
             })
         };
 
+        /* BANCO DE DADOS */
         const Db = {
-            get: async () => {
+            list: async () => {
                 try {
                     let r = await fetch(Config.db + ".json");
                     let d = await r.json();
                     return d ? Object.keys(d).map(k=>({...d[k], id:k})) : [];
                 } catch { return []; }
             },
-            add: async (d) => fetch(Config.db + ".json", {method:'POST', body:JSON.stringify(d)}),
-            active: async (id) => fetch(`${Config.db}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:'active'})}),
+            save: async (d) => fetch(Config.db + ".json", {method:'POST', body:JSON.stringify(d)}),
+            status: async (id, s) => fetch(`${Config.db}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:s})}),
             del: async (id) => fetch(`${Config.db}/${id}.json`, {method:'DELETE'})
         };
 
+        /* CONTROLE */
         const Admin = {
             check: () => {
-                if(sessionStorage.getItem('kb1_adm')) {
-                    Utils.$('adminBar').style.display='block';
+                if(sessionStorage.getItem('kbg_adm')) {
+                    Utils.$('adminBar').style.display = 'block';
                     return true;
                 } return false;
             },
             login: () => {
-                if(prompt("Senha Bibliotecário:") === Config.pass) {
-                    sessionStorage.setItem('kb1_adm','true');
+                if(prompt("Senha:") === Config.pass) {
+                    sessionStorage.setItem('kbg_adm', 'true');
                     location.reload();
                 }
             },
-            logout: () => { sessionStorage.removeItem('kb1_adm'); location.reload(); }
+            logout: () => { sessionStorage.removeItem('kbg_adm'); location.reload(); },
+            
+            // Aprovar obra de usuário (vinda do pagamento da taxa)
+            approve: async (id) => {
+                if(confirm("Confirmar Pix da Taxa e Publicar?")) {
+                    await Db.status(id, 'active');
+                    App.load();
+                }
+            }
         };
 
+        /* CORE */
         const App = {
-            list: [],
+            items: [],
             
             init: async () => {
                 Admin.check();
-                Visits.count();
+                Visits.tick();
                 await App.load();
             },
 
             load: async () => {
-                Utils.$('grid').innerHTML = '<div class="spinner"></div>';
-                let data = await Db.get();
-                App.list = data;
+                const grid = Utils.$('grid');
+                grid.innerHTML = '<div class="loader"></div>';
                 
-                const filter = Utils.$('filterType').value;
+                let list = await Db.list();
+                App.items = list; // Cache local
+                App.render();
+            },
+
+            // Sistema de Filtro
+            filter: (mode, el) => {
+                document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+                el.classList.add('active');
+                App.render(mode);
+            },
+
+            render: (filterMode = 'all') => {
+                const grid = Utils.$('grid');
+                grid.innerHTML = '';
+                
                 const isAdmin = Admin.check();
                 
-                // Filtra Pendentes (Admin vê tudo)
-                let show = data.filter(b => b.status === 'active' || (isAdmin && b.status === 'pending'));
-                
-                // Filtro Origem
-                if(filter === 'khareis') show = show.filter(b => b.author.toLowerCase().includes('khareis') || b.origin === 'admin');
-                if(filter === 'community') show = show.filter(b => !b.author.toLowerCase().includes('khareis') && b.origin !== 'admin');
+                // Filtros lógicos
+                let show = App.items.filter(b => {
+                    if(!isAdmin && b.status !== 'active') return false; // Público só vê ativo
+                    
+                    if(filterMode === 'all') return true;
+                    if(filterMode === 'community') return (b.origin !== 'admin');
+                    
+                    // Categorias
+                    return (b.category === filterMode);
+                });
 
-                Utils.$('grid').innerHTML = '';
-                
-                if(show.length === 0) Utils.$('grid').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999">Estante vazia.</p>';
+                if(show.length === 0) grid.innerHTML = '<p style="text-align:center; color:#999; grid-column:1/-1;">Estante vazia nesta seção.</p>';
 
                 show.sort((a,b) => b.createdAt - a.createdAt);
 
                 show.forEach(b => {
-                    const price = parseFloat(b.salePrice);
-                    const tag = price > 0 ? Utils.money(price) : "GRATUITO";
-                    const cls = price > 0 ? "t-paid" : "t-free";
-                    const cover = b.cover || 'https://placehold.co/300x450?text=Capa';
                     const isPending = b.status === 'pending';
+                    const price = parseFloat(b.salePrice);
+                    const tag = price > 0 ? Utils.money(price) : "GRÁTIS";
+                    const cls = price > 0 ? "paid" : "free";
+                    const cover = b.cover || 'https://placehold.co/300x450?text=KhareisBook';
 
-                    let adminUI = "";
+                    // Botão Admin sobre a capa
+                    let overlay = "";
                     if(isAdmin) {
-                        if(isPending) adminUI = `<div style="position:absolute; inset:0; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:10px;"><strong style="color:red; font-size:0.8rem;">PENDENTE (Taxa R$10)</strong><button onclick="event.stopPropagation();Db.active('${b.id}').then(App.load)" style="background:green; color:white; border:none; padding:5px 10px; margin-top:5px; cursor:pointer;">APROVAR</button><button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px 10px; margin-top:5px; cursor:pointer;">REJEITAR</button></div>`;
-                        else adminUI = `<button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="position:absolute; bottom:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer;">x</button>`;
+                        if(isPending) overlay = `<div style="position:absolute; inset:0; background:rgba(255,255,255,0.9); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:10;"><strong style="color:red">PENDENTE</strong><button onclick="event.stopPropagation();Admin.approve('${b.id}')" style="background:green; color:white; border:none; padding:5px; margin-top:5px; cursor:pointer;">APROVAR</button><button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px; margin-top:5px; cursor:pointer;">DELETAR</button></div>`;
+                        else overlay = `<button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="position:absolute; bottom:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; z-index:10;">X</button>`;
                     }
 
-                    const div = document.createElement('div');
-                    div.className = 'book';
-                    div.innerHTML = `
-                        <div class="cover-box" onclick="Modal.show('${b.id}')">
-                            <span class="price-tag ${cls}">${tag}</span>
+                    // Ação do Cartão
+                    const action = `Modal.details('${b.id}')`;
+
+                    const el = document.createElement('div');
+                    el.className = 'book';
+                    el.innerHTML = `
+                        <div class="cover-box" onclick="${action}">
+                            <span class="price-badge ${cls}">${tag}</span>
                             <img src="${cover}" loading="lazy">
-                            ${adminUI}
+                            ${overlay}
                         </div>
                         <div class="b-title">${b.title}</div>
                         <div class="b-author">${b.author}</div>
-                        <button onclick="Modal.show('${b.id}')" class="btn-action ${price>0?'btn-pay':'btn-free'}">
-                            ${price>0 ? 'Adquirir' : 'Acessar'}
+                        <button onclick="${action}" class="btn-card ${price>0?'card-buy':'card-get'}">
+                            ${price > 0 ? 'ADQUIRIR' : 'ACESSAR'}
                         </button>
                     `;
-                    Utils.$('grid').appendChild(div);
+                    grid.appendChild(el);
                 });
             }
         };
 
+        /* LÓGICA DO FORMULÁRIO (USUÁRIO/ADMIN) */
         const Form = {
-            data: {},
-            
+            tmp: {},
+
             calc: () => {
                 const val = parseFloat(Utils.$('inpPrice').value) || 0;
                 if(val > 0) {
-                    Utils.$('authPixBox').style.display = 'block';
-                    Utils.$('valAuth').innerText = Utils.money(val * 0.9);
-                    Utils.$('valPlat').innerText = Utils.money(val * 0.1);
+                    Utils.$('financeBox').style.display = 'block';
+                    Utils.$('showPrice').innerText = Utils.money(val);
+                    Utils.$('showShare').innerText = Utils.money(val * 0.9); // 90%
                 } else {
-                    Utils.$('authPixBox').style.display = 'none';
+                    Utils.$('financeBox').style.display = 'none';
                 }
             },
 
             submit: async () => {
-                const title = Utils.$('inpTitle').value;
-                if(!title) return alert("Título obrigatório.");
-                
-                const file = Utils.$('inpCover').files[0];
-                const cover64 = await Utils.compress(file);
                 const isAdmin = Admin.check();
+                const title = Utils.$('inpTitle').value;
+                if(!title) return alert("Título é obrigatório.");
 
-                Form.data = {
+                const f = Utils.$('inpCover').files[0];
+                const cover64 = await Utils.compress(f);
+
+                Form.tmp = {
+                    category: Utils.$('inpCat').value,
                     title: title,
                     author: Utils.$('inpAuthor').value || "Anônimo",
                     desc: Utils.$('inpDesc').value,
                     link: Utils.$('inpLink').value,
-                    cover: cover64,
                     salePrice: Utils.$('inpPrice').value || 0,
-                    authorPix: Utils.$('inpPixKey').value,
+                    authorPix: Utils.$('inpPixKey').value || "",
+                    cover: cover64,
                     origin: isAdmin ? 'admin' : 'community',
-                    status: isAdmin ? 'active' : 'pending',
+                    status: isAdmin ? 'active' : 'pending', // Admin vai direto
                     createdAt: Date.now()
                 };
 
+                // Admin: Salva direto. User: Vai pra tela da taxa R$10
                 if(isAdmin) {
-                    await Db.add(Form.data);
-                    alert("Obra publicada!");
-                    location.reload();
+                    await Db.save(Form.tmp);
+                    alert("Obra publicada com sucesso!");
+                    Modal.close(); App.load();
                 } else {
-                    Utils.$('viewForm').style.display='none';
-                    Utils.$('viewFee').style.display='block';
+                    Modal.toFee(); // Tela de Taxa
                 }
             },
 
-            confirm: async () => {
-                await Db.add(Form.data); 
-                const msg = `Olá! Paguei a taxa de R$10 para publicar a obra: "${Form.data.title}". Aguardo aprovação.`;
+            confirmUpload: async () => {
+                await Db.save(Form.tmp); // Salva como pending
+                const msg = `Olá! Acabei de cadastrar a obra "${Form.tmp.title}" e paguei a Taxa de Catalogação (R$ 10,00). Aguardo aprovação.`;
                 window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-                alert("Obra enviada! Aguarde a aprovação após o envio do comprovante.");
+                Modal.close();
+                alert("Obra enviada! Assim que confirmarmos o pagamento da taxa, ela estará disponível.");
                 location.reload();
             }
         };
 
+        /* GERENCIADOR DE JANELAS */
         const Modal = {
             el: Utils.$('modal'),
-            close: () => Modal.el.style.display='none',
+            
+            close: () => Modal.el.style.display = 'none',
             
             openPub: () => {
-                Modal.el.style.display='flex';
-                Utils.$('viewForm').style.display='block';
-                Utils.$('viewFee').style.display='none';
-                Utils.$('viewBook').style.display='none';
-                Utils.$('viewBuy').style.display='none';
+                Modal.el.style.display = 'flex';
+                Utils.$('screenUpload').style.display = 'block';
+                Utils.$('screenFee').style.display = 'none';
+                Utils.$('screenBuy').style.display = 'none';
+                Utils.$('screenBook').style.display = 'none';
             },
 
-            // TELA DE PAGAMENTO E AVISOS DE VENDA
-            openBuy: (b) => {
-                Utils.$('viewBook').style.display='none';
-                Utils.$('viewBuy').style.display='block';
-                
-                Utils.$('buyCover').src = b.cover || '';
-                Utils.$('buyTitle').innerText = b.title;
-                Utils.$('buyPrice').innerText = Utils.money(parseFloat(b.salePrice));
-                
-                // Mensagem formatada
-                const msg = `Olá! Quero adquirir a obra: "${b.title}". Valor: ${Utils.money(b.salePrice)}. Segue meu comprovante.`;
-                Utils.$('btnBuyConfirm').onclick = () => window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+            toFee: () => {
+                Utils.$('screenUpload').style.display = 'none';
+                Utils.$('screenFee').style.display = 'block';
             },
 
-            show: (id) => {
-                const b = App.list.find(x => x.id === id);
+            // Mostra os detalhes do livro
+            details: (id) => {
+                const b = App.items.find(i => i.id === id);
                 if(!b) return;
-                
-                Modal.el.style.display='flex';
-                Utils.$('viewForm').style.display='none';
-                Utils.$('viewFee').style.display='none';
-                Utils.$('viewBuy').style.display='none';
-                Utils.$('viewBook').style.display='block';
+
+                Modal.el.style.display = 'flex';
+                Utils.$('screenUpload').style.display = 'none';
+                Utils.$('screenFee').style.display = 'none';
+                Utils.$('screenBuy').style.display = 'none';
+                Utils.$('screenBook').style.display = 'block';
 
                 const price = parseFloat(b.salePrice);
-                let btnHtml = "";
-                let financial = "";
+                let btn = "";
+                let adminPanel = "";
 
+                // Painel para Admin ver a comissão na hora de repassar
                 if(Admin.check() && price > 0) {
-                    financial = `<div style="background:#fffbeb; color:#92400e; padding:10px; margin-bottom:10px; text-align:left; font-size:0.8rem; border:1px solid #fcd34d;">
-                        <strong>👮 PAINEL FINANCEIRO:</strong><br>
-                        Venda: ${Utils.money(price)} | Autor (90%): <strong>${Utils.money(price*0.9)}</strong><br>
-                        Pix do Autor: <code>${b.authorPix}</code>
+                    adminPanel = `<div style="background:#fff7ed; padding:10px; border:1px solid #fdba74; font-size:0.8rem; margin-bottom:15px; text-align:left;">
+                        <strong>💰 PAINEL DO ADMIN:</strong><br>
+                        Venda: ${Utils.money(price)} | Reter (10%): ${Utils.money(price*0.1)}<br>
+                        👉 <strong>Repassar Autor: ${Utils.money(price*0.9)}</strong><br>
+                        Chave Pix: <code>${b.authorPix}</code>
                     </div>`;
                 }
 
                 if(price > 0) {
-                    // Botão que LEVA para a tela de Compra detalhada
-                    // Passa o objeto 'b' através do array 'App.list' usando o ID no clique
-                    btnHtml = `<button id="btnPreBuy" class="btn-action" style="background:#25D366; color:white; font-size:1.1rem;"><i class="fab fa-whatsapp"></i> Comprar (${Utils.money(price)})</button>`;
+                    // Botão de COMPRA
+                    btn = `<button class="btn-main btn-pay" id="preBuyBtn"><i class="fas fa-shopping-cart"></i> ADQUIRIR (${Utils.money(price)})</button>`;
                 } else {
+                    // Botão de BAIXAR
                     if(b.link) {
-                        btnHtml = `<button onclick="window.open('${b.link}','_blank')" class="btn-action btn-pay">⬇️ Baixar Agora</button>`;
+                        btn = `<button onclick="window.open('${b.link}','_blank')" class="btn-main">⬇️ BAIXAR AGORA</button>`;
                     } else {
-                        btnHtml = `<button class="btn-action" disabled style="background:#ccc">Link Indisponível</button>`;
+                        btn = `<button disabled class="btn-main" style="background:#ccc">LINK INDISPONÍVEL</button>`;
                     }
                 }
 
-                Utils.$('bookDetails').innerHTML = `
-                    ${financial}
-                    <img src="${b.cover}" style="height:200px; border-radius:4px; box-shadow:0 5px 15px rgba(0,0,0,0.3); margin-bottom:15px;">
-                    <h3 style="color:var(--deep); margin-bottom:5px;">${b.title}</h3>
-                    <p style="color:#666; font-style:italic; margin-bottom:15px;">Por ${b.author}</p>
-                    <p style="text-align:justify; color:#333; line-height:1.6; margin-bottom:20px;">${b.desc}</p>
-                    ${btnHtml}
+                Utils.$('bookDetailContent').innerHTML = `
+                    ${adminPanel}
+                    <img src="${b.cover}" style="height:220px; box-shadow:0 5px 20px rgba(0,0,0,0.3); border-radius:4px; margin-bottom:20px;">
+                    <h2 style="font-family:var(--serif); color:var(--deep); margin-bottom:5px;">${b.title}</h2>
+                    <p style="font-style:italic; color:#666; margin-bottom:20px;">Por ${b.author}</p>
+                    <p style="text-align:justify; line-height:1.6; color:#333; margin-bottom:25px;">${b.desc}</p>
+                    ${btn}
                 `;
 
-                // Adiciona o evento de clique após o HTML ser gerado
                 if(price > 0) {
-                    Utils.$('btnPreBuy').onclick = () => Modal.openBuy(b);
+                    Utils.$('preBuyBtn').onclick = () => Modal.toBuy(b);
                 }
+            },
+
+            // Tela Específica de Pagamento (Compra)
+            toBuy: (b) => {
+                Utils.$('screenBook').style.display = 'none';
+                Utils.$('screenBuy').style.display = 'block';
+                
+                Utils.$('buyCover').src = b.cover;
+                Utils.$('buyTitle').innerText = b.title;
+                Utils.$('buyVal').innerText = Utils.money(parseFloat(b.salePrice));
+                
+                const msg = `Olá! Quero adquirir a obra "${b.title}" no valor de ${Utils.money(b.salePrice)}. Segue meu comprovante de pagamento.`;
+                Utils.$('btnBuyConfirm').onclick = () => window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
             }
         };
 
         const Visits = {
-            count: async () => {
-                const url = "https://khareisbook-default-rtdb.firebaseio.com/visits.json";
-                let n = 1;
+            tick: async () => {
+                const u = "https://khareisbook-default-rtdb.firebaseio.com/views.json";
                 try {
-                    let r = await fetch(url);
-                    let d = await r.json();
-                    if(d) n = d + 1;
-                    if(!sessionStorage.getItem('v_count')) {
-                        fetch(url, {method:'PUT', body:n});
-                        sessionStorage.setItem('v_count', '1');
-                    }
+                    let r = await fetch(u); let d = await r.json();
+                    let n = (d || 1000);
+                    if(!sessionStorage.getItem('v')) { n++; fetch(u, {method:'PUT', body:n}); sessionStorage.setItem('v','1'); }
                     Utils.$('visitCount').innerText = n;
-                } catch(e) { Utils.$('visitCount').innerText = "-"; }
+                } catch { Utils.$('visitCount').innerText = "1k+"; }
             }
         };
 
