@@ -3,27 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhareisBook | Biblioteca V3</title>
+    <title>KhareisBook | Biblioteca Híbrida</title>
     
+    <!-- Ícone -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+
+    <!-- Fontes: Merriweather (Literária) & Inter (Moderna) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-body: #f8fafc;
+            /* Cores e Planos */
+            --bg-body: #f0f2f5;
             --paper: #ffffff;
+            --ink: #1e293b;
+            
+            --gold: #d4af37; /* VIP/Admin */
+            --blue: #2563eb; /* Commerce */
+            --gray: #64748b; /* Padrão */
+            
             --deep: #0f172a;
-            --gold: #d4af37;
-            --blue: #2563eb;
-            --gray: #64748b;
             --heart: #e11d48;
+
             --font-serif: 'Merriweather', serif;
             --font-sans: 'Inter', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-body); color: var(--deep); font-family: var(--font-sans); padding-bottom: 80px; }
+        body { background-color: var(--bg-body); color: var(--ink); font-family: var(--font-sans); padding-bottom: 80px; }
+        
         h1, h2, h3, .brand { font-family: var(--font-serif); }
 
         /* HEADER */
@@ -31,210 +42,200 @@
             background: var(--paper); border-bottom: 1px solid #e2e8f0;
             position: sticky; top: 0; z-index: 50; padding: 1rem 5%;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
         .brand { font-weight: 900; font-size: 1.4rem; color: var(--deep); display: flex; align-items: center; gap: 8px; }
         .brand span { color: var(--gold); }
         
         .btn-publish {
-            background: var(--deep); color: white; border: none;
-            padding: 8px 20px; border-radius: 30px; font-weight: bold;
+            background: var(--deep); color: var(--gold); border: none;
+            padding: 8px 16px; border-radius: 4px; font-weight: bold;
             cursor: pointer; display: flex; align-items: center; gap: 8px;
-            font-size: 0.9rem; transition: 0.2s; box-shadow: 0 4px 10px rgba(15,23,42,0.2);
+            font-size: 0.9rem; transition: 0.2s;
         }
-        .btn-publish:hover { background: var(--gold); color: var(--deep); }
+        .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-        /* NAV FILTROS (Novo na V3) */
-        .nav-filters {
-            background: var(--paper); padding: 10px 5%; border-bottom: 1px solid #eee;
-            display: flex; gap: 10px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
-        }
-        .pill {
-            padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;
-            border: 1px solid #e2e8f0; color: var(--gray); transition: 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .pill.active { background: var(--deep); color: var(--gold); border-color: var(--deep); font-weight: bold; }
-        .pill:hover { border-color: var(--gold); }
+        /* HERO & INFO */
+        .shelf-info { text-align: center; padding: 3rem 1rem; background: var(--deep); color: white; margin-bottom: 2rem; }
+        .shelf-info h2 { color: var(--gold); margin-bottom: 10px; font-size: 2rem; }
+        .shelf-info p { opacity: 0.8; max-width: 600px; margin: 0 auto; font-weight: 300; }
 
-        .origin-filter { margin-left: auto; border-left: 2px solid #eee; padding-left: 10px; }
-        @media(max-width: 768px) { .nav-filters { flex-direction: column; align-items: flex-start; } .origin-filter { border: none; padding: 0; margin: 0; } }
-
-        /* HERO */
-        .shelf-header { text-align: center; padding: 3rem 1rem; background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%); }
-        .shelf-header h2 { color: var(--deep); margin-bottom: 10px; font-size: 2rem; }
-        .shelf-header p { opacity: 0.7; max-width: 600px; margin: 0 auto; }
-
-        /* GRID */
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 5%; }
+        /* GRID ESTANTE */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
         .grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 2rem 1.5rem;
         }
 
-        /* CARD */
+        /* CARD DE LIVRO */
         .book {
-            background: white; border-radius: 8px; overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s;
-            position: relative; border: 1px solid #f1f5f9; display: flex; flex-direction: column;
+            position: relative; perspective: 1000px; cursor: pointer;
+            transition: transform 0.3s;
         }
-        .book:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .book:hover { transform: translateY(-5px); }
         
-        .cover-box { aspect-ratio: 2/3; position: relative; background: #eee; overflow: hidden; }
+        .cover-wrap {
+            aspect-ratio: 2/3; background: #ddd; border-radius: 4px 8px 8px 4px;
+            overflow: hidden; box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            position: relative; margin-bottom: 10px;
+        }
         .book img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Badges */
-        .plan-badge { position: absolute; top: 10px; right: 0; padding: 4px 10px; font-size: 0.7rem; font-weight: bold; color: white; border-radius: 4px 0 0 4px; box-shadow: -2px 2px 5px rgba(0,0,0,0.3); z-index: 2; }
-        .bg-perm { background: var(--gold); color: black; }
-        .bg-vip { background: var(--deep); border: 1px solid var(--gold); }
-        .bg-comm { background: var(--blue); }
-        .bg-std { background: var(--gray); }
-
-        .type-icon { 
-            position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; 
-            background: rgba(0,0,0,0.6); color: white; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); font-size: 0.9rem;
+        /* Badges de Plano */
+        .badge {
+            position: absolute; top: 10px; right: 0; padding: 4px 10px;
+            color: white; font-weight: bold; font-size: 0.7rem; text-transform: uppercase;
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.2); border-radius: 4px 0 0 4px;
         }
-
-        .info { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-        .b-title { font-weight: 700; margin-bottom: 5px; line-height: 1.3; font-size: 1rem; color: var(--deep); }
-        .b-author { font-size: 0.85rem; color: var(--gray); font-style: italic; margin-bottom: 10px; }
-        .b-desc { font-size: 0.8rem; color: #666; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 15px; }
+        .b-permanent { background: var(--gold); color: black; }
+        .b-vip { background: linear-gradient(45deg, #FFD700, #FDB931); color: black; border: 1px solid white; }
+        .b-commerce { background: var(--blue); }
+        .b-padrao { background: var(--gray); }
         
-        /* Admin Overlay */
-        .pending-overlay {
-            position: absolute; inset: 0; background: rgba(255,255,255,0.85); 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10; font-weight: bold; color: var(--heart); text-align: center; padding: 10px;
+        /* Pendente (Visual Admin) */
+        .book.pending { opacity: 0.7; }
+        .book.pending .cover-wrap::after {
+            content: 'AGUARDANDO APROVAÇÃO'; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(225, 29, 72, 0.8); color: white; display: flex;
+            align-items: center; justify-content: center; font-weight: bold; text-align: center; font-size: 0.8rem; padding: 10px;
         }
+
+        .book-title { font-weight: 700; line-height: 1.2; font-size: 1rem; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+        .book-author { font-size: 0.8rem; color: #64748b; font-style: italic; }
 
         /* MODAL */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.9); z-index: 100; align-items: center; justify-content: center; }
+        .modal-box { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; }
         
-        .form-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block; }
-        .form-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px; background: #f8fafc; }
+        .step { display: none; } .step.active { display: block; }
         
-        .plan-options { display: flex; gap: 10px; margin-bottom: 20px; }
-        .p-opt { flex: 1; border: 2px solid #eee; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; opacity: 0.6; }
-        .p-opt.active { border-color: var(--blue); background: #eff6ff; opacity: 1; }
+        .form-group { margin-bottom: 12px; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Seleção de Planos */
+        .plan-cards { display: flex; gap: 10px; margin-bottom: 15px; }
+        .p-card { flex: 1; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 6px; cursor: pointer; transition: 0.2s; opacity: 0.6; }
+        .p-card.selected { border-color: var(--blue); background: #eff6ff; opacity: 1; transform: scale(1.05); font-weight: bold; }
+        
+        .btn-full { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-adm { background: var(--gold); color: black; margin-top: 5px; }
+        .btn-del { background: var(--heart); margin-top: 5px; }
 
-        .btn-action { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-outline { background: transparent; color: var(--gray); border: 1px solid var(--gray); margin-top: 10px; }
-
-        footer { text-align: center; padding: 3rem; color: var(--gray); font-size: 0.85rem; border-top: 1px solid #e2e8f0; margin-top: 3rem; }
-        .admin-trigger { cursor: pointer; opacity: 0.3; } .admin-trigger:hover { opacity: 1; }
-        .admin-bar { background: var(--heart); color: white; text-align: center; padding: 5px; font-size: 0.8rem; display: none; }
-
-        .spinner { border: 3px solid #eee; border-top: 3px solid var(--gold); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 30px auto; }
+        /* Rodapé */
+        footer { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.8rem; margin-top: 4rem; border-top: 1px solid #e2e8f0; }
+        .admin-link { cursor: pointer; color: #cbd5e1; margin-left: 5px; }
+        .admin-bar { background: var(--deep); color: white; text-align: center; padding: 5px; font-size: 0.8rem; display: none; }
+        
+        /* Spinner */
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--gold); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="adminBar" class="admin-bar">🔓 ADMIN LOGADO | <span style="text-decoration:underline; cursor:pointer" onclick="Admin.logout()">Sair</span></div>
+    <!-- BARRA DE ADMIN -->
+    <div id="adminBar" class="admin-bar">
+        🔓 MODO BIBLIOTECÁRIO ATIVO | <span onclick="Admin.logout()" style="text-decoration:underline; cursor:pointer;">Sair</span>
+    </div>
 
     <header>
-        <div class="brand"><i class="fas fa-book-open"></i> Khareis<span>Book</span></div>
-        <button class="btn-publish" onclick="Modal.openPub()">
-            <i class="fas fa-cloud-upload-alt"></i> Publicar
+        <div class="brand">
+            <i class="fas fa-university fa-lg"></i>
+            <div>Khareis<span>Book</span></div>
+        </div>
+        <button class="btn-publish" onclick="Modal.open()">
+            <i class="fas fa-plus-circle"></i> Publicar Obra
         </button>
     </header>
 
-    <!-- NAVEGAÇÃO DE FILTROS V3 -->
-    <div class="nav-filters">
-        <!-- Tipo de Mídia -->
-        <div class="pill active" onclick="App.filterType('all', this)"><i class="fas fa-border-all"></i> Tudo</div>
-        <div class="pill" onclick="App.filterType('livros', this)"><i class="fas fa-book"></i> Livros/PDFs</div>
-        <div class="pill" onclick="App.filterType('artigos', this)"><i class="fas fa-scroll"></i> Artigos</div>
-        <div class="pill" onclick="App.filterType('multimidia', this)"><i class="fas fa-play-circle"></i> Mídia</div>
-        
-        <!-- Origem (Khareis vs Comunidade) -->
-        <div style="flex:1"></div>
-        <div class="origin-filter" style="display:flex; gap:10px;">
-            <div class="pill" onclick="App.filterOrigin('permanent', this)"><i class="fas fa-university"></i> Acervo Khareis</div>
-            <div class="pill" onclick="App.filterOrigin('community', this)"><i class="fas fa-users"></i> Comunidade</div>
+    <div class="shelf-info">
+        <h2>Acervo Vivo & Híbrido</h2>
+        <p>Explore a coleção permanente ou divulgue suas próprias obras e artigos para a comunidade.</p>
+        <!-- FILTROS -->
+        <div style="margin-top: 15px;">
+            <select id="filterSelect" onchange="App.load()" style="padding: 5px 10px; border-radius: 20px; border: none; font-family: var(--font-sans);">
+                <option value="todos">Todas as Obras</option>
+                <option value="permanent">🏛️ Acervo Permanente</option>
+                <option value="comunidade">👥 Da Comunidade</option>
+            </select>
         </div>
     </div>
 
-    <div class="shelf-header">
-        <h2 id="pageTitle">Biblioteca Geral</h2>
-        <p>Acesse o conhecimento do Acervo Khareis ou descubra contribuições da comunidade.</p>
-    </div>
-
     <div class="container">
-        <div id="grid" class="grid">
+        <div id="gridBooks" class="grid">
             <div class="spinner"></div>
         </div>
     </div>
 
     <footer>
-        <p>"Ler é ganhar asas para o mundo."</p>
-        <p style="margin-top:10px;">&copy; 2025 KhareisBook V3 <span class="admin-trigger" onclick="Admin.login()">🔒</span></p>
+        <p>"O conhecimento é a única riqueza que cresce quando compartilhada."</p>
+        <p style="margin-top:10px;">&copy; 2025 KhareisBook • Hybrid System V2 <span class="admin-link" onclick="Admin.prompt()">🔒</span></p>
     </footer>
 
-    <!-- MODAL (Upload / View) -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span onclick="Modal.close()" style="float:right; font-size:1.5rem; cursor:pointer; color:#999">&times;</span>
+    <!-- MODAL DE INTERAÇÃO -->
+    <div id="mainModal" class="modal">
+        <div class="modal-box">
+            <span onclick="Modal.close()" style="position:absolute; right:15px; top:10px; font-size:1.5rem; cursor:pointer;">&times;</span>
             
-            <!-- FORM DE PUBLICAÇÃO -->
-            <div id="viewForm" style="display:none;">
-                <h3 style="margin-bottom:15px; color:var(--deep)">Nova Publicação</h3>
+            <!-- FORMULÁRIO DE PUBLICAÇÃO -->
+            <div id="formView" style="display:none;">
+                <h3 style="margin-bottom:15px;">Publicar na Estante</h3>
                 
-                <label class="form-label">Tipo de Obra</label>
-                <div class="plan-options">
-                    <div class="p-opt active" onclick="Form.setType('livros', this)">📚 Livro</div>
-                    <div class="p-opt" onclick="Form.setType('artigos', this)">📝 Artigo</div>
-                    <div class="p-opt" onclick="Form.setType('multimidia', this)">🎬 Mídia</div>
+                <div class="form-group">
+                    <label style="font-weight:bold; font-size:0.9rem; display:block; margin-bottom:5px;">Escolha o Plano de Exposição:</label>
+                    <div class="plan-cards">
+                        <div class="p-card selected" onclick="Form.setPlan('vip', 10, this)">
+                            <div style="color:var(--gold)">VIP</div>
+                            <small>30 Dias</small><br>
+                            <strong>R$ 10</strong>
+                        </div>
+                        <div class="p-card" onclick="Form.setPlan('commerce', 6, this)">
+                            <div style="color:var(--blue)">COMM</div>
+                            <small>15 Dias</small><br>
+                            <strong>R$ 6</strong>
+                        </div>
+                        <div class="p-card" onclick="Form.setPlan('padrao', 3, this)">
+                            <div style="color:var(--gray)">STD</div>
+                            <small>7 Dias</small><br>
+                            <strong>R$ 3</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Opção Secreta de Admin -->
+                    <div id="adminPlanOption" style="display:none; text-align:center; background:#eee; padding:5px; margin-bottom:10px; border-radius:4px;">
+                        <label><input type="checkbox" id="chkPermanent" onchange="Form.togglePermanent()"> 🏛️ Tornar Permanente (Grátis/Acervo)</label>
+                    </div>
                 </div>
 
-                <label class="form-label">Plano de Visibilidade</label>
-                <div class="plan-options">
-                    <div class="p-opt active" onclick="Form.setPlan('vip', 10, this)">
-                        <strong>VIP</strong><br><small>30d - R$10</small>
-                    </div>
-                    <div class="p-opt" onclick="Form.setPlan('commerce', 6, this)">
-                        <strong>PRO</strong><br><small>15d - R$6</small>
-                    </div>
-                    <div class="p-opt" onclick="Form.setPlan('padrao', 3, this)">
-                        <strong>STD</strong><br><small>7d - R$3</small>
-                    </div>
-                </div>
-                <!-- Admin Checkbox -->
-                <div id="adminOptions" style="display:none; margin-bottom:15px; padding:10px; background:#f0f9ff; border:1px dashed var(--blue); border-radius:4px;">
-                    <label><input type="checkbox" id="chkPerm" onchange="Form.togglePerm()"> 🏛️ Tornar Permanente (Grátis)</label>
-                </div>
+                <div class="form-group"><input id="inpTitle" class="form-control" placeholder="Título da Obra / Artigo"></div>
+                <div class="form-group"><input id="inpAuthor" class="form-control" placeholder="Nome do Autor"></div>
+                <div class="form-group"><input id="inpLink" class="form-control" placeholder="Link do PDF/Arquivo (Drive/Dropbox)"></div>
+                <div class="form-group"><textarea id="inpDesc" class="form-control" rows="3" placeholder="Sinopse ou Breve Descrição..."></textarea></div>
+                <div class="form-group"><label>Capa (Imagem Vertical)</label><input type="file" id="inpCover" accept="image/*" class="form-control"></div>
 
-                <input id="inpTitle" class="form-input" placeholder="Título da Obra">
-                <input id="inpAuthor" class="form-input" placeholder="Autor">
-                <input id="inpLink" class="form-input" placeholder="Link do Arquivo (Drive, YouTube, etc)">
-                <textarea id="inpDesc" class="form-input" rows="3" placeholder="Sinopse..."></textarea>
-                <label class="form-label">Capa (Imagem Vertical)</label>
-                <input type="file" id="inpCover" accept="image/*" class="form-input">
-
-                <button class="btn-action" onclick="Form.submit()">Continuar</button>
+                <button class="btn-full" onclick="Form.submit()">Ir para Pagamento/Publicação</button>
             </div>
 
-            <!-- PAGAMENTO PIX -->
-            <div id="viewPix" style="display:none; text-align:center;">
-                <h3 style="color:var(--blue)">Ativação Pendente</h3>
-                <div style="background:#f1f5f9; padding:20px; border-radius:12px; margin:20px 0;">
-                    <p>Valor a Pagar: <strong id="pixVal" style="font-size:1.5rem; display:block; margin:10px 0;"></strong></p>
-                    <p style="font-size:0.9rem;">Chave Pix (Telefone)</p>
-                    <code style="background:white; padding:5px 10px; border-radius:4px; border:1px solid #ccc; font-size:1.1rem;">61 999487649</code>
+            <!-- TELA DE PIX -->
+            <div id="pixView" style="display:none; text-align:center;">
+                <h3 style="color:var(--blue)">Confirmação</h3>
+                <p>Para ativar sua publicação no plano <strong id="lblPlan"></strong>:</p>
+                
+                <div style="background:#f8f9fa; padding:15px; border:1px dashed #ccc; margin:15px 0; border-radius:8px;">
+                    <p>Valor: <strong id="lblPrice" style="font-size:1.4rem;"></strong></p>
+                    <p style="font-size:0.8rem; margin-top:5px;">Chave Pix (Celular):</p>
+                    <p style="font-family:monospace; font-size:1.1rem;">61 999487649</p>
                 </div>
-                <button class="btn-action" style="background:#25D366" onclick="Form.confirmPix()">Enviar Comprovante (WhatsApp)</button>
-                <button class="btn-action btn-outline" onclick="Modal.close()">Cancelar</button>
+
+                <button class="btn-full" style="background:#25D366;" onclick="Form.finishPix()">
+                    <i class="fab fa-whatsapp"></i> Enviar Comprovante
+                </button>
+                <button class="btn-full" style="background:#ccc; color:#333;" onclick="Modal.close()">Cancelar</button>
             </div>
 
-            <!-- LEITURA / ACESSO -->
-            <div id="viewBook" style="display:none; text-align:center;">
-                <img id="readCover" src="" style="height:200px; box-shadow:0 5px 15px rgba(0,0,0,0.2); border-radius:4px; margin-bottom:15px;">
-                <h3 id="readTitle" style="color:var(--deep)"></h3>
-                <p id="readAuthor" style="color:var(--gray); font-style:italic; margin-bottom:15px;"></p>
-                <p id="readDesc" style="text-align:left; color:#444; font-size:0.95rem; line-height:1.6; margin-bottom:25px;"></p>
-                
-                <button id="readBtn" class="btn-action" onclick="">Acessar Conteúdo</button>
+            <!-- DETALHES DO LIVRO (Leitura) -->
+            <div id="bookView" style="display:none;">
+                <div id="bookContent"></div>
             </div>
 
         </div>
@@ -242,35 +243,36 @@
 
     <script>
         /**
-         * KHAREISBOOK V3 ENGINE
+         * SISTEMA HÍBRIDO V2
          */
         const Config = {
-            url: "https://khareisbook-default-rtdb.firebaseio.com/library_v3",
+            dbUrl: "https://khareisbook-default-rtdb.firebaseio.com/library",
             pixKey: "61 999487649",
-            pass: "khareis2025",
+            adminPass: "khareis2025",
             
             plans: {
-                permanent: { d: 9999, p: 0, t: "ACERVO" },
-                vip:       { d: 30,   p: 10, t: "VIP" },
-                commerce:  { d: 15,   p: 6,  t: "PRO" },
-                padrao:    { d: 7,    p: 3,  t: "STD" }
+                permanent: { days: 99999, price: 0, label: "🏛️ Acervo Permanente" },
+                vip:       { days: 30,    price: 10, label: "VIP (30 Dias)" },
+                commerce:  { days: 15,    price: 6,  label: "Commerce (15 Dias)" },
+                padrao:    { days: 7,     price: 3,  label: "Padrão (7 Dias)" }
             }
         };
 
         const Utils = {
             $: id => document.getElementById(id),
-            price: v => parseFloat(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),
-            compress: f => new Promise(r => {
-                if(!f) r(null);
-                let reader = new FileReader(); reader.readAsDataURL(f);
-                reader.onload = e => {
-                    let img = new Image(); img.src = e.target.result;
+            formatMoney: v => parseFloat(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),
+            
+            compress: file => new Promise(resolve => {
+                if(!file) resolve(null);
+                const r = new FileReader(); r.readAsDataURL(file);
+                r.onload = e => {
+                    const img = new Image(); img.src = e.target.result;
                     img.onload = () => {
-                        let c = document.createElement('canvas');
-                        let s = 400/img.width; 
-                        c.width = 400; c.height = img.height * s;
+                        const c = document.createElement('canvas');
+                        const s = 300 / img.width; // Reduzir capa para 300px width
+                        c.width = 300; c.height = img.height * s;
                         c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-                        r(c.toDataURL('image/jpeg', 0.65));
+                        resolve(c.toDataURL('image/jpeg', 0.7));
                     }
                 }
             })
@@ -279,263 +281,259 @@
         const Db = {
             list: async () => {
                 try {
-                    let res = await fetch(Config.url + ".json");
-                    let data = await res.json();
-                    return data ? Object.keys(data).map(k=>({...data[k], id:k})) : [];
-                } catch(e) { return []; }
+                    let r = await fetch(Config.dbUrl + ".json");
+                    let d = await r.json();
+                    return d ? Object.keys(d).map(k=>({...d[k], id:k})) : [];
+                } catch(e){ return []; }
             },
-            save: async (data) => fetch(Config.url + ".json", {method:'POST', body:JSON.stringify(data)}),
-            setStatus: async (id, s) => fetch(`${Config.url}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:s})}),
-            del: async (id) => fetch(`${Config.url}/${id}.json`, {method:'DELETE'})
+            create: async (data) => {
+                await fetch(Config.dbUrl + ".json", {method:'POST', body:JSON.stringify(data)});
+            },
+            updateStatus: async (id) => fetch(`${Config.dbUrl}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:'active'})}),
+            remove: async (id) => fetch(`${Config.dbUrl}/${id}.json`, {method:'DELETE'})
         };
 
         const Admin = {
             check: () => {
-                if(sessionStorage.getItem('kb3_adm')) {
-                    Utils.$('adminBar').style.display = 'block';
-                    Utils.$('adminOptions').style.display = 'block';
+                if(sessionStorage.getItem('kb_adm')){
+                    Utils.$('adminBar').style.display='block';
+                    Utils.$('adminPlanOption').style.display='block'; // Mostra opção permanente no form
                     return true;
                 }
                 return false;
             },
-            login: () => {
-                if(prompt("Senha Bibliotecário:") === Config.pass) {
-                    sessionStorage.setItem('kb3_adm', 'true');
+            prompt: () => {
+                if(prompt("Senha do Bibliotecário:") === Config.adminPass) {
+                    sessionStorage.setItem('kb_adm','true');
                     location.reload();
                 }
             },
-            logout: () => { sessionStorage.removeItem('kb3_adm'); location.reload(); },
-            act: (action, id) => {
-                if(action === 'approve') { if(confirm('Aprovar Obra?')) { Db.setStatus(id, 'active').then(App.load); } }
-                if(action === 'del') { if(confirm('Excluir?')) { Db.del(id).then(App.load); } }
+            logout: () => { sessionStorage.removeItem('kb_adm'); location.reload(); },
+            
+            // Aprovar obra de usuário
+            approve: async (id) => {
+                if(confirm("Confirmar Pix e Publicar obra?")) {
+                    await Db.updateStatus(id);
+                    App.load();
+                }
+            },
+            delete: async (id) => {
+                if(confirm("Remover permanentemente?")) {
+                    await Db.remove(id);
+                    App.load();
+                }
             }
         };
 
         const App = {
-            data: [],
-            filterT: 'all',
-            filterO: 'all',
-
+            books: [],
+            
             init: async () => {
                 Admin.check();
                 await App.load();
             },
 
             load: async () => {
-                Utils.$('grid').innerHTML = '<div class="spinner"></div>';
-                let list = await Db.list();
+                Utils.$('gridBooks').innerHTML = '<div class="spinner"></div>';
                 
-                // FAXINA AUTO (Exceto Permanente)
+                let all = await Db.list();
                 const now = Date.now();
-                list.forEach(b => {
-                    if(b.plan !== 'permanent') {
-                        const maxMs = Config.plans[b.plan].d * 86400000;
-                        if(now - b.createdAt > maxMs) Db.del(b.id);
-                    }
-                });
-
-                // Remove deletados da memória local
-                App.data = list.filter(b => b.plan === 'permanent' || (now - b.createdAt <= Config.plans[b.plan].d * 86400000));
-                
-                App.render();
-            },
-
-            filterType: (t, el) => {
-                App.filterT = t;
-                // UI Toggle
-                let siblings = el.parentNode.querySelectorAll('.pill');
-                siblings.forEach(s => s.classList.remove('active'));
-                el.classList.add('active');
-                App.render();
-            },
-
-            filterOrigin: (o, el) => {
-                // Toggle Logic (Click again to unselect)
-                if(App.filterO === o) { App.filterO = 'all'; el.classList.remove('active'); } 
-                else { 
-                    App.filterO = o; 
-                    let siblings = el.parentNode.querySelectorAll('.pill');
-                    siblings.forEach(s => s.classList.remove('active'));
-                    el.classList.add('active');
-                }
-                App.render();
-            },
-
-            render: () => {
                 const isAdmin = Admin.check();
-                const grid = Utils.$('grid');
-                grid.innerHTML = '';
+                const filter = Utils.$('filterSelect').value;
 
-                // LOGICA DE FILTRO COMBINADO
-                let items = App.data.filter(b => {
-                    // Status
-                    if(!isAdmin && b.status !== 'active') return false;
-                    // Type
-                    if(App.filterT !== 'all' && b.type !== App.filterT) return false;
-                    // Origin
-                    if(App.filterO === 'permanent' && b.plan !== 'permanent') return false;
-                    if(App.filterO === 'community' && b.plan === 'permanent') return false;
+                // 1. FAXINA AUTOMÁTICA
+                for(let b of all) {
+                    const days = Config.plans[b.plan]?.days || 7;
+                    const expireMs = days * 24 * 60 * 60 * 1000;
                     
-                    return true;
-                });
-
-                // ORDENAR
-                items.sort((a,b) => {
-                    if(a.status !== b.status) return a.status === 'pending' ? -1 : 1; // Pendentes primeiro para admin
-                    const weight = {permanent:4, vip:3, commerce:2, padrao:1};
-                    return weight[b.plan] - weight[a.plan] || b.createdAt - a.createdAt;
-                });
-
-                if(items.length === 0) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#999;margin-top:30px;">Prateleira vazia.</div>';
-
-                items.forEach(book => {
-                    const isPerm = book.plan === 'permanent';
-                    const badgeTxt = Config.plans[book.plan].t;
-                    const badgeCls = isPerm ? 'bg-perm' : (book.plan === 'vip' ? 'bg-vip' : (book.plan === 'commerce' ? 'bg-comm' : 'bg-std'));
-                    
-                    let icon = 'fas fa-book';
-                    if(book.type === 'artigos') icon = 'fas fa-file-alt';
-                    if(book.type === 'multimidia') icon = 'fas fa-video';
-
-                    const isPending = book.status === 'pending';
-                    const cover = book.cover || 'https://placehold.co/200x300?text=KhareisBook';
-
-                    const card = document.createElement('div');
-                    card.className = 'book';
-                    if(isPending) card.style.opacity = '0.9';
-
-                    // ADMIN ACTIONS
-                    let overlay = '';
-                    if(isAdmin && isPending) {
-                        overlay = `<div class="pending-overlay">PENDENTE<br><br><button onclick="event.stopPropagation(); Admin.act('approve','${book.id}')" style="padding:5px 10px; background:var(--blue); color:white; border:none; cursor:pointer; border-radius:4px;">APROVAR</button><br><button onclick="event.stopPropagation(); Admin.act('del','${book.id}')" style="margin-top:5px; padding:5px 10px; background:var(--heart); color:white; border:none; cursor:pointer; border-radius:4px;">APAGAR</button></div>`;
-                    } else if (isAdmin) {
-                        overlay = `<button onclick="event.stopPropagation(); Admin.act('del','${book.id}')" style="position:absolute; top:35px; right:0; z-index:5; background:var(--heart); color:white; border:none; padding:2px 8px; font-size:0.7rem;">DEL</button>`;
+                    // Se não for permanente e já venceu -> DELETA
+                    if(b.plan !== 'permanent' && (now - b.createdAt > expireMs)) {
+                        Db.remove(b.id); 
+                        continue;
                     }
+                }
 
-                    card.innerHTML = `
-                        ${overlay}
-                        <div class="cover-box" onclick="Modal.read('${book.id}')" style="cursor:pointer">
-                            <span class="plan-badge ${badgeCls}">${badgeTxt}</span>
-                            <div class="type-icon"><i class="${icon}"></i></div>
-                            <img src="${cover}" loading="lazy">
+                // Recarrega lista limpa (simulação visual, na real o ideal seria filtrar local)
+                // Vamos apenas filtrar os deletados do array 'all'
+                all = all.filter(b => b.plan === 'permanent' || (now - b.createdAt <= (Config.plans[b.plan]?.days * 86400000)));
+
+                App.books = all; // Salva ref
+                
+                Utils.$('gridBooks').innerHTML = '';
+                
+                // 2. FILTRAR E RENDERIZAR
+                let toShow = [];
+                
+                all.forEach(b => {
+                    // Filtro de Admin (vê pendentes) vs Público (só ativos)
+                    if(b.status === 'pending' && !isAdmin) return; 
+
+                    // Filtros do Select
+                    if(filter === 'permanent' && b.plan !== 'permanent') return;
+                    if(filter === 'comunidade' && b.plan === 'permanent') return;
+
+                    toShow.push(b);
+                });
+
+                if(toShow.length === 0) Utils.$('gridBooks').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#888">Nenhuma obra encontrada.</p>';
+
+                // ORDENAR: Permanente primeiro, depois VIPs
+                toShow.sort((a,b) => {
+                    const w = {permanent:4, vip:3, commerce:2, padrao:1};
+                    return (w[b.plan] - w[a.plan]) || (b.createdAt - a.createdAt);
+                });
+
+                toShow.forEach(book => {
+                    // Badge Visual
+                    let badgeClass = 'b-padrao';
+                    let badgeText = 'Padrão';
+                    
+                    if(book.plan === 'permanent') { badgeClass='b-permanent'; badgeText='🏛️ ACERVO'; }
+                    else if(book.plan === 'vip') { badgeClass='b-vip'; badgeText='⭐ VIP'; }
+                    else if(book.plan === 'commerce') { badgeClass='b-commerce'; badgeText='🚀 COMMERCE'; }
+
+                    const img = book.cover || 'https://placehold.co/200x300?text=Sem+Capa';
+                    const isPending = book.status === 'pending';
+                    const pendingClass = isPending ? 'pending' : '';
+
+                    let action = `Modal.showBook('${book.id}')`;
+                    // Se for admin, ao clicar num pendente, aprova
+                    
+                    const el = document.createElement('div');
+                    el.className = `book ${pendingClass}`;
+                    el.onclick = () => isPending && isAdmin ? null : Modal.showBook(book.id); 
+                    
+                    el.innerHTML = `
+                        <div class="cover-wrap">
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                            <img src="${img}" loading="lazy">
                         </div>
-                        <div class="info">
-                            <div class="b-title">${book.title}</div>
-                            <div class="b-author">${book.author}</div>
-                            <div class="b-desc">${book.desc}</div>
-                        </div>
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author">${book.author}</div>
+                        ${isPending && isAdmin ? `<button onclick="event.stopPropagation(); Admin.approve('${book.id}')" class="btn-full btn-adm">✅ Aprovar</button>` : ''}
+                        ${isAdmin ? `<button onclick="event.stopPropagation(); Admin.delete('${book.id}')" class="btn-full btn-del" style="font-size:0.7rem;padding:5px;">🗑️</button>` : ''}
                     `;
-                    grid.appendChild(card);
+                    Utils.$('gridBooks').appendChild(el);
                 });
             }
         };
 
         const Form = {
-            tmp: { type: 'livros', plan: 'vip', price: 10 },
+            selPlan: 'vip',
+            selPrice: 10,
+            pendingData: null,
 
-            setType: (t, el) => {
-                Form.tmp.type = t;
-                el.parentNode.querySelectorAll('div').forEach(d=>d.classList.remove('active'));
-                el.classList.add('active');
+            setPlan: (plan, price, el) => {
+                Form.selPlan = plan;
+                Form.selPrice = price;
+                document.querySelectorAll('.p-card').forEach(c=>c.classList.remove('selected'));
+                if(el) el.classList.add('selected');
+                Utils.$('chkPermanent').checked = false;
             },
-            setPlan: (p, pr, el) => {
-                Form.tmp.plan = p;
-                Form.tmp.price = pr;
-                Utils.$('chkPerm').checked = false;
-                el.parentNode.querySelectorAll('div').forEach(d=>d.classList.remove('active'));
-                el.classList.add('active');
-            },
-            togglePerm: () => {
-                if(Utils.$('chkPerm').checked) {
-                    Form.tmp.plan = 'permanent';
-                    Form.tmp.price = 0;
-                    document.querySelectorAll('.plan-options .p-opt').forEach(d=>d.classList.remove('active'));
+
+            togglePermanent: () => {
+                const chk = Utils.$('chkPermanent').checked;
+                if(chk) {
+                    Form.selPlan = 'permanent';
+                    Form.selPrice = 0;
+                    document.querySelectorAll('.p-card').forEach(c=>c.classList.remove('selected'));
                 } else {
-                    Form.setPlan('vip', 10, document.querySelector('.plan-options .p-opt'));
+                    // Reset to Default VIP
+                    Form.setPlan('vip', 10, document.querySelector('.p-card'));
                 }
             },
 
             submit: async () => {
                 const title = Utils.$('inpTitle').value;
-                if(!title) return alert("Título necessário.");
-                
-                const file = Utils.$('inpCover').files[0];
-                const cover64 = await Utils.compress(file);
+                if(!title) return alert("Título obrigatório!");
 
-                const payload = {
+                const imgFile = Utils.$('inpCover').files[0];
+                const imgData = await Utils.compress(imgFile);
+
+                Form.pendingData = {
                     title: title,
-                    author: Utils.$('inpAuthor').value || 'Anônimo',
+                    author: Utils.$('inpAuthor').value || "Anônimo",
                     link: Utils.$('inpLink').value,
                     desc: Utils.$('inpDesc').value,
-                    cover: cover64,
-                    type: Form.tmp.type,
-                    plan: Form.tmp.plan,
-                    price: Form.tmp.price,
-                    status: (Form.tmp.price === 0) ? 'active' : 'pending', // Gratis/Perm entra direto se admin
-                    createdAt: Date.now()
+                    cover: imgData,
+                    plan: Form.selPlan,
+                    price: Form.selPrice,
+                    createdAt: Date.now(),
+                    status: (Form.selPlan === 'permanent') ? 'active' : 'pending' // Admin publica direto
                 };
 
-                Form.finalPayload = payload;
-
-                if(payload.price === 0) {
-                    await Db.save(payload);
-                    Modal.close(); App.load();
-                    alert("Obra publicada!");
+                // Se for Grátis/Permanente (Admin), salva direto. Se for pago, cobra Pix.
+                if(Form.selPrice === 0) {
+                    await Db.create(Form.pendingData);
+                    Modal.close();
+                    App.load();
+                    alert("Obra publicada no Acervo!");
                 } else {
-                    Utils.$('viewForm').style.display='none';
-                    Utils.$('viewPix').style.display='block';
-                    Utils.$('pixVal').innerText = Utils.price(payload.price);
+                    Utils.$('formView').style.display='none';
+                    Utils.$('pixView').style.display='block';
+                    Utils.$('lblPlan').innerText = Config.plans[Form.selPlan].label;
+                    Utils.$('lblPrice').innerText = Utils.formatMoney(Form.selPrice);
                 }
             },
 
-            confirmPix: async () => {
-                const id = await Db.save(Form.finalPayload); // Salva Pending
-                // Abre Zap
-                const text = `Olá! Quero publicar "${Form.finalPayload.title}" (${Config.plans[Form.finalPayload.plan].t}). Valor: ${Utils.price(Form.finalPayload.price)}. Segue comprovante.`;
-                window.open(`https://wa.me/55${Config.pixKey.replace(/ /g,'')}?text=${encodeURIComponent(text)}`, '_blank');
+            finishPix: async () => {
+                // Salva como pendente
+                await Db.create(Form.pendingData);
+                const title = Form.pendingData.title;
+                const price = Utils.formatMoney(Form.pendingData.price);
+                
+                // Manda pro Zap
+                const msg = `Olá! Quero publicar a obra: "${title}" (${Form.pendingData.plan}). Valor: ${price}. Segue comprovante.`;
+                window.open(`https://wa.me/55${Config.pixKey.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                
                 Modal.close();
-                alert("Enviado para aprovação!");
+                alert("Obra enviada para aprovação!");
+                location.reload(); // Para limpar o form
             }
         };
 
         const Modal = {
-            overlay: Utils.$('modal'),
-            
-            close: () => Modal.overlay.style.display='none',
-            
-            openPub: () => {
-                Modal.overlay.style.display='flex';
-                Utils.$('viewForm').style.display='block';
-                Utils.$('viewPix').style.display='none';
-                Utils.$('viewBook').style.display='none';
+            open: () => {
+                Utils.$('mainModal').style.display = 'flex';
+                Utils.$('formView').style.display = 'block';
+                Utils.$('pixView').style.display = 'none';
+                Utils.$('bookView').style.display = 'none';
+                // Reset basic inputs would go here
             },
+            showBook: (id) => {
+                const book = App.books.find(b => b.id === id);
+                if(!book) return;
 
-            read: (id) => {
-                const b = App.data.find(x => x.id === id);
-                if(!b) return;
+                Utils.$('mainModal').style.display = 'flex';
+                Utils.$('formView').style.display = 'none';
+                Utils.$('pixView').style.display = 'none';
+                Utils.$('bookView').style.display = 'block';
 
-                Modal.overlay.style.display='flex';
-                Utils.$('viewForm').style.display='none';
-                Utils.$('viewPix').style.display='none';
-                Utils.$('viewBook').style.display='block';
+                const btnTxt = book.link ? "⬇️ Acessar / Baixar" : "💬 Contatar Autor";
+                const action = book.link 
+                    ? `window.open('${book.link}','_blank')`
+                    : `window.open('https://wa.me/55${Config.pixKey.replace(/ /g,'')}?text=Interesse na obra ${book.title}','_blank')`; // Fallback to admin contact
 
-                Utils.$('readCover').src = b.cover || '';
-                Utils.$('readTitle').innerText = b.title;
-                Utils.$('readAuthor').innerText = b.author ? `Por ${b.author}` : '';
-                Utils.$('readDesc').innerText = b.desc;
-
-                const btn = Utils.$('readBtn');
-                if(b.link) {
-                    btn.innerText = "⬇️ Acessar / Baixar";
-                    btn.onclick = () => window.open(b.link, '_blank');
-                } else {
-                    btn.innerText = "⚠️ Link indisponível";
-                    btn.onclick = null;
-                }
-            }
+                Utils.$('bookContent').innerHTML = `
+                    <div style="text-align:center">
+                        <img src="${book.cover || ''}" style="max-height:200px; box-shadow:0 5px 15px rgba(0,0,0,0.3); margin-bottom:20px; border-radius:4px;">
+                        <h2 style="margin-bottom:5px;">${book.title}</h2>
+                        <p style="color:#666; font-style:italic;">Por ${book.author}</p>
+                        <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+                        <p style="text-align:left; line-height:1.6; color:#333; margin-bottom:20px;">${book.desc}</p>
+                        
+                        <button onclick="${action}" class="btn-full" style="background:var(--deep); border-radius:30px;">
+                            ${btnTxt}
+                        </button>
+                    </div>
+                `;
+            },
+            close: () => Utils.$('mainModal').style.display = 'none'
         };
 
+        // Iniciar
         window.addEventListener('load', App.init);
+
     </script>
 </body>
 </html>
