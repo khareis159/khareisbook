@@ -482,7 +482,8 @@
                 Utils.$('screenFee').style.display = 'block';
             },
 
-            // Mostra os detalhes do livro
+
+// Mostra os detalhes do livro
             details: (id) => {
                 const b = App.items.find(i => i.id === id);
                 if(!b) return;
@@ -497,21 +498,30 @@
                 let btn = "";
                 let adminPanel = "";
 
-                // Painel para Admin ver a comissão na hora de repassar
-                if(Admin.check() && price > 0) {
-                    adminPanel = `<div style="background:#fff7ed; padding:10px; border:1px solid #fdba74; font-size:0.8rem; margin-bottom:15px; text-align:left;">
-                        <strong>💰 PAINEL DO ADMIN:</strong><br>
-                        Venda: ${Utils.money(price)} | Reter (10%): ${Utils.money(price*0.1)}<br>
-                        👉 <strong>Repassar Autor: ${Utils.money(price*0.9)}</strong><br>
-                        Chave Pix: <code>${b.authorPix}</code>
-                    </div>`;
+                // PAINEL DO ADMIN (Agora mostra o Link para você enviar)
+                if(Admin.check()) {
+                    // Se for pago, mostra o financeiro e o link secreto
+                    if(price > 0) {
+                        adminPanel = `<div style="background:#fff7ed; padding:15px; border:2px solid #fdba74; font-size:0.85rem; margin-bottom:15px; text-align:left; border-radius:6px;">
+                            <strong>👮 PAINEL DE CONTROLE (Só vc vê):</strong><br>
+                            💰 Venda: ${Utils.money(price)} | Reter (10%): ${Utils.money(price*0.1)}<br>
+                            👉 <strong>Repassar Autor: ${Utils.money(price*0.9)}</strong><br>
+                            🔑 Pix do Autor: <code>${b.authorPix}</code><br>
+                            <hr style="margin:8px 0; border-color:#fed7aa">
+                            📂 <strong>Link para Entrega:</strong> <a href="${b.link}" target="_blank" style="color:#c2410c; text-decoration:underline; font-weight:bold;">ABRIR/COPIAR LINK</a>
+                            <br><small>(Copie este link e envie no Zap do cliente)</small>
+                        </div>`;
+                    } else {
+                        // Se for grátis, mostra botão de deletar rápido
+                        adminPanel = `<div style="text-align:right; margin-bottom:10px;"><button onclick="if(confirm('Apagar?')) Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Apagar Obra</button></div>`;
+                    }
                 }
 
                 if(price > 0) {
-                    // Botão de COMPRA
+                    // Botão de COMPRA (Cliente)
                     btn = `<button class="btn-main btn-pay" id="preBuyBtn"><i class="fas fa-shopping-cart"></i> ADQUIRIR (${Utils.money(price)})</button>`;
                 } else {
-                    // Botão de BAIXAR
+                    // Botão de BAIXAR (Grátis)
                     if(b.link) {
                         btn = `<button onclick="window.open('${b.link}','_blank')" class="btn-main">⬇️ BAIXAR AGORA</button>`;
                     } else {
@@ -532,6 +542,11 @@
                     Utils.$('preBuyBtn').onclick = () => Modal.toBuy(b);
                 }
             },
+
+
+
+
+
 
             // Tela Específica de Pagamento (Compra)
             toBuy: (b) => {
