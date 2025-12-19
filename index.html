@@ -227,3 +227,268 @@
     <script>
         const Config = {
             db: "https://khareisbook-default-rtdb.firebaseio.com/shelf",
+            pix: "61 999487649",
+            pass: "khareis2025",
+            fee: 10 
+        };
+
+        const Utils = {
+            $: i => document.getElementById(i),
+            money: v => parseFloat(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),
+            compress: f => new Promise(r => {
+                if(!f) r(null);
+                let rd = new FileReader(); rd.readAsDataURL(f);
+                rd.onload = e => {
+                    let i = new Image(); i.src = e.target.result;
+                    i.onload = () => {
+                        let c = document.createElement('canvas');
+                        let s = 400/i.width; c.width=400; c.height=i.height*s;
+                        c.getContext('2d').drawImage(i,0,0,c.width,c.height);
+                        r(c.toDataURL('image/jpeg', 0.7));
+                    }
+                }
+            })
+        };
+
+        const Db = {
+            get: async () => {
+                try {
+                    let r = await fetch(Config.db + ".json");
+                    let d = await r.json();
+                    return d ? Object.keys(d).map(k=>({...d[k], id:k})) : [];
+                } catch { return []; }
+            },
+            add: async (d) => fetch(Config.db + ".json", {method:'POST', body:JSON.stringify(d)}),
+            active: async (id) => fetch(`${Config.db}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:'active'})}),
+            del: async (id) => fetch(`${Config.db}/${id}.json`, {method:'DELETE'})
+        };
+
+        const Admin = {
+            check: () => {
+                if(sessionStorage.getItem('kb1_adm')) {
+                    Utils.$('adminBar').style.display='block';
+                    return true;
+                } return false;
+            },
+            login: () => {
+                if(prompt("Senha Bibliotecário:") === Config.pass) {
+                    sessionStorage.setItem('kb1_adm','true');
+                    location.reload();
+                }
+            },
+            logout: () => { sessionStorage.removeItem('kb1_adm'); location.reload(); }
+        };
+
+        const App = {
+            list: [],
+            
+            init: async () => {
+                Admin.check();
+                Visits.count();
+                await App.load();
+            },
+
+            load: async () => {
+                Utils.$('grid').innerHTML = '<div class="spinner"></div>';
+                let data = await Db.get();
+                App.list = data;
+                
+                const filter = Utils.$('filterType').value;
+                const isAdmin = Admin.check();
+                
+                // Filtra Pendentes (Admin vê tudo)
+                let show = data.filter(b => b.status === 'active' || (isAdmin && b.status === 'pending'));
+                
+                // Filtro Origem
+                if(filter === 'khareis') show = show.filter(b => b.author.toLowerCase().includes('khareis') || b.origin === 'admin');
+                if(filter === 'community') show = show.filter(b => !b.author.toLowerCase().includes('khareis') && b.origin !== 'admin');
+
+                Utils.$('grid').innerHTML = '';
+                
+                if(show.length === 0) Utils.$('grid').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999">Estante vazia.</p>';
+
+                show.sort((a,b) => b.createdAt - a.createdAt);
+
+                show.forEach(b => {
+                    const price = parseFloat(b.salePrice);
+                    const tag = price > 0 ? Utils.money(price) : "GRATUITO";
+                    const cls = price > 0 ? "t-paid" : "t-free";
+                    const cover = b.cover || 'https://placehold.co/300x450?text=Capa';
+                    const isPending = b.status === 'pending';
+
+                    let adminUI = "";
+                    if(isAdmin) {
+                        if(isPending) adminUI = `<div style="position:absolute; inset:0; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:10px;"><strong style="color:red; font-size:0.8rem;">PENDENTE (Taxa R$10)</strong><button onclick="event.stopPropagation();Db.active('${b.id}').then(App.load)" style="background:green; color:white; border:none; padding:5px 10px; margin-top:5px; cursor:pointer;">APROVAR</button><button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px 10px; margin-top:5px; cursor:pointer;">REJEITAR</button></div>`;
+                        else adminUI = `<button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="position:absolute; bottom:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer;">x</button>`;
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = 'book';
+                    div.innerHTML = `
+                        <div class="cover-box" onclick="Modal.show('${b.id}')">
+                            <span class="price-tag ${cls}">${tag}</span>
+                            <img src="${cover}" loading="lazy">
+                            ${adminUI}
+                        </div>
+                        <div class="b-title">${b.title}</div>
+                        <div class="b-author">${b.author}</div>
+                        <button onclick="Modal.show('${b.id}')" class="btn-action ${price>0?'btn-pay':'btn-free'}">
+                            ${price>0 ? 'Adquirir' : 'Acessar'}
+                        </button>
+                    `;
+                    Utils.$('grid').appendChild(div);
+                });
+            }
+        };
+
+        const Form = {
+            data: {},
+            
+            calc: () => {
+                const val = parseFloat(Utils.$('inpPrice').value) || 0;
+                if(val > 0) {
+                    Utils.$('authPixBox').style.display = 'block';
+                    Utils.$('valAuth').innerText = Utils.money(val * 0.9);
+                    Utils.$('valPlat').innerText = Utils.money(val * 0.1);
+                } else {
+                    Utils.$('authPixBox').style.display = 'none';
+                }
+            },
+
+            submit: async () => {
+                const title = Utils.$('inpTitle').value;
+                if(!title) return alert("Título obrigatório.");
+                
+                const file = Utils.$('inpCover').files[0];
+                const cover64 = await Utils.compress(file);
+                const isAdmin = Admin.check();
+
+                Form.data = {
+                    title: title,
+                    author: Utils.$('inpAuthor').value || "Anônimo",
+                    desc: Utils.$('inpDesc').value,
+                    link: Utils.$('inpLink').value,
+                    cover: cover64,
+                    salePrice: Utils.$('inpPrice').value || 0,
+                    authorPix: Utils.$('inpPixKey').value,
+                    origin: isAdmin ? 'admin' : 'community',
+                    status: isAdmin ? 'active' : 'pending',
+                    createdAt: Date.now()
+                };
+
+                if(isAdmin) {
+                    await Db.add(Form.data);
+                    alert("Obra publicada!");
+                    location.reload();
+                } else {
+                    Utils.$('viewForm').style.display='none';
+                    Utils.$('viewFee').style.display='block';
+                }
+            },
+
+            confirm: async () => {
+                await Db.add(Form.data); 
+                const msg = `Olá! Paguei a taxa de R$10 para publicar a obra: "${Form.data.title}". Aguardo aprovação.`;
+                window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                alert("Obra enviada! Aguarde a aprovação após o envio do comprovante.");
+                location.reload();
+            }
+        };
+
+        const Modal = {
+            el: Utils.$('modal'),
+            close: () => Modal.el.style.display='none',
+            
+            openPub: () => {
+                Modal.el.style.display='flex';
+                Utils.$('viewForm').style.display='block';
+                Utils.$('viewFee').style.display='none';
+                Utils.$('viewBook').style.display='none';
+                Utils.$('viewBuy').style.display='none';
+            },
+
+            // TELA DE PAGAMENTO E AVISOS DE VENDA
+            openBuy: (b) => {
+                Utils.$('viewBook').style.display='none';
+                Utils.$('viewBuy').style.display='block';
+                
+                Utils.$('buyCover').src = b.cover || '';
+                Utils.$('buyTitle').innerText = b.title;
+                Utils.$('buyPrice').innerText = Utils.money(parseFloat(b.salePrice));
+                
+                // Mensagem formatada
+                const msg = `Olá! Quero adquirir a obra: "${b.title}". Valor: ${Utils.money(b.salePrice)}. Segue meu comprovante.`;
+                Utils.$('btnBuyConfirm').onclick = () => window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+            },
+
+            show: (id) => {
+                const b = App.list.find(x => x.id === id);
+                if(!b) return;
+                
+                Modal.el.style.display='flex';
+                Utils.$('viewForm').style.display='none';
+                Utils.$('viewFee').style.display='none';
+                Utils.$('viewBuy').style.display='none';
+                Utils.$('viewBook').style.display='block';
+
+                const price = parseFloat(b.salePrice);
+                let btnHtml = "";
+                let financial = "";
+
+                if(Admin.check() && price > 0) {
+                    financial = `<div style="background:#fffbeb; color:#92400e; padding:10px; margin-bottom:10px; text-align:left; font-size:0.8rem; border:1px solid #fcd34d;">
+                        <strong>👮 PAINEL FINANCEIRO:</strong><br>
+                        Venda: ${Utils.money(price)} | Autor (90%): <strong>${Utils.money(price*0.9)}</strong><br>
+                        Pix do Autor: <code>${b.authorPix}</code>
+                    </div>`;
+                }
+
+                if(price > 0) {
+                    // Botão que LEVA para a tela de Compra detalhada
+                    // Passa o objeto 'b' através do array 'App.list' usando o ID no clique
+                    btnHtml = `<button id="btnPreBuy" class="btn-action" style="background:#25D366; color:white; font-size:1.1rem;"><i class="fab fa-whatsapp"></i> Comprar (${Utils.money(price)})</button>`;
+                } else {
+                    if(b.link) {
+                        btnHtml = `<button onclick="window.open('${b.link}','_blank')" class="btn-action btn-pay">⬇️ Baixar Agora</button>`;
+                    } else {
+                        btnHtml = `<button class="btn-action" disabled style="background:#ccc">Link Indisponível</button>`;
+                    }
+                }
+
+                Utils.$('bookDetails').innerHTML = `
+                    ${financial}
+                    <img src="${b.cover}" style="height:200px; border-radius:4px; box-shadow:0 5px 15px rgba(0,0,0,0.3); margin-bottom:15px;">
+                    <h3 style="color:var(--deep); margin-bottom:5px;">${b.title}</h3>
+                    <p style="color:#666; font-style:italic; margin-bottom:15px;">Por ${b.author}</p>
+                    <p style="text-align:justify; color:#333; line-height:1.6; margin-bottom:20px;">${b.desc}</p>
+                    ${btnHtml}
+                `;
+
+                // Adiciona o evento de clique após o HTML ser gerado
+                if(price > 0) {
+                    Utils.$('btnPreBuy').onclick = () => Modal.openBuy(b);
+                }
+            }
+        };
+
+        const Visits = {
+            count: async () => {
+                const url = "https://khareisbook-default-rtdb.firebaseio.com/visits.json";
+                let n = 1;
+                try {
+                    let r = await fetch(url);
+                    let d = await r.json();
+                    if(d) n = d + 1;
+                    if(!sessionStorage.getItem('v_count')) {
+                        fetch(url, {method:'PUT', body:n});
+                        sessionStorage.setItem('v_count', '1');
+                    }
+                    Utils.$('visitCount').innerText = n;
+                } catch(e) { Utils.$('visitCount').innerText = "-"; }
+            }
+        };
+
+        window.addEventListener('load', App.init);
+    </script>
+</body>
+</html>
