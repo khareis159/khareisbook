@@ -258,8 +258,7 @@
 
     <script>
         /* SETUP */
-       const Config = {
-            // Voltamos para o banco original da biblioteca
+        const Config = {
             db: "https://khareisbook-default-rtdb.firebaseio.com/shelf", 
             pix: "61 999487649",
             pass: "khareis2025",
@@ -334,36 +333,14 @@
                 await App.load();
             },
 
-// --- COPIE DAQUI ATÉ O PRÓXIMO COMENTÁRIO ---
-
-load: async () => {
+            load: async () => {
                 const grid = Utils.$('grid');
                 grid.innerHTML = '<div class="loader"></div>';
                 
-                // 1. Busca livros locais da Biblioteca
-                let localItems = await Db.list();
-
-                // 2. Busca forjas externas da Faculdade
-                let externalItems = [];
-                try {
-                    const res = await fetch("https://iofw-79391-default-rtdb.firebaseio.com/mural_publico.json");
-                    const data = await res.json();
-                    if(data) {
-                        externalItems = Object.keys(data).map(id => ({
-                            ...data[id], id, category: 'artigos', salePrice: 0, 
-                            status: 'active', source: 'external',
-                            cover: 'https://placehold.co/300x450?text=Volume+OESD'
-                        }));
-                    }
-                } catch(e) { console.warn("Ponte externa offline."); }
-
-                // 3. Une e exibe
-                App.items = [...localItems, ...externalItems];
+                let list = await Db.list();
+                App.items = list; // Cache local
                 App.render();
             },
-            
-// --- FIM DA SUBSTITUIÇÃO ---
-           
 
             // Sistema de Filtro
             filter: (mode, el) => {
@@ -402,7 +379,7 @@ load: async () => {
 
                     // Botão Admin sobre a capa
                     let overlay = "";
-                    if(isAdmin && b.source !== 'external') {
+                    if(isAdmin) {
                         if(isPending) overlay = `<div style="position:absolute; inset:0; background:rgba(255,255,255,0.9); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:10;"><strong style="color:red">PENDENTE</strong><button onclick="event.stopPropagation();Admin.approve('${b.id}')" style="background:green; color:white; border:none; padding:5px; margin-top:5px; cursor:pointer;">APROVAR</button><button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px; margin-top:5px; cursor:pointer;">DELETAR</button></div>`;
                         else overlay = `<button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="position:absolute; bottom:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; z-index:10;">X</button>`;
                     }
