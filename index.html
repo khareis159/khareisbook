@@ -259,7 +259,9 @@
     <script>
         /* SETUP */
         const Config = {
-            db: "https://khareisbook-default-rtdb.firebaseio.com/shelf", 
+           
+            db: "https://iofw-79391-default-rtdb.firebaseio.com/shelf",
+            
             pix: "61 999487649",
             pass: "khareis2025",
             fee: 10
@@ -333,14 +335,46 @@
                 await App.load();
             },
 
+// --- COPIE DAQUI ATÉ O PRÓXIMO COMENTÁRIO ---
             load: async () => {
                 const grid = Utils.$('grid');
                 grid.innerHTML = '<div class="loader"></div>';
                 
+                // 1. Puxa os livros que você cadastrou manualmente no KhareisBook
                 let list = await Db.list();
-                App.items = list; // Cache local
+                App.items = list; 
+
+                // 2. [PONTE SIMBIÓTICA] - Puxa as Forjas do Laboratório (iofw-79391)
+                try {
+                    const resOESD = await fetch("https://iofw-79391-default-rtdb.firebaseio.com/mural_publico.json");
+                    const dataOESD = await resOESD.json();
+                    
+                    if(dataOESD) {
+                        Object.keys(dataOESD).forEach(id => {
+                            const forja = dataOESD[id];
+                            // Transforma a conversa da IA em um "Livro" na estante
+                            App.items.push({
+                                id: id,
+                                title: forja.titulo || "Saber em Forja",
+                                author: forja.autor || "Pioneiro",
+                                desc: forja.resumo || "Registro simbiótico da Faculdade Íntegra.",
+                                category: 'artigos', // Coloca na categoria Artigos automaticamente
+                                salePrice: 0,        // Sempre gratuito
+                                status: 'active',
+                                origin: 'community',
+                                cover: 'https://placehold.co/300x450?text=Volume+OESD' // Capa padrão OESD
+                            });
+                        });
+                    }
+                } catch(e) { console.error("Erro na ponte de dados:", e); }
+
+                // 3. Renderiza tudo junto (Livros + Forjas)
                 App.render();
             },
+// --- FIM DA SUBSTITUIÇÃO ---
+
+
+            
 
             // Sistema de Filtro
             filter: (mode, el) => {
