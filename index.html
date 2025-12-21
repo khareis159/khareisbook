@@ -255,11 +255,13 @@
 
         </div>
     </div>
-
-    <script>
-        /* SETUP */
+<script>
+        /**
+         * KHAREISBOOK V1.6 - GOLD & DEBUGGED
+         */
         const Config = {
             db: "https://khareisbook-default-rtdb.firebaseio.com/shelf", 
+            visitsUrl: "https://khareisbook-default-rtdb.firebaseio.com/visits.json",
             pix: "61 999487649",
             pass: "khareis2025",
             fee: 10
@@ -267,8 +269,16 @@
 
         const Utils = {
             $: i => document.getElementById(i),
-            money: v => parseFloat(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),
+            
+            // Correção Debug: Garante que o valor é numérico antes de formatar
+            money: v => {
+                let n = parseFloat(v);
+                if (isNaN(n)) n = 0;
+                return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            },
+            
             copy: t => { navigator.clipboard.writeText(t); alert("Chave Copiada!"); },
+            
             compress: f => new Promise(r => {
                 if(!f) r(null);
                 let rd = new FileReader(); rd.readAsDataURL(f);
@@ -284,297 +294,271 @@
             })
         };
 
-        /* BANCO DE DADOS */
         const Db = {
-            list: async () => {
+            get: async () => {
                 try {
                     let r = await fetch(Config.db + ".json");
                     let d = await r.json();
                     return d ? Object.keys(d).map(k=>({...d[k], id:k})) : [];
                 } catch { return []; }
             },
-            save: async (d) => fetch(Config.db + ".json", {method:'POST', body:JSON.stringify(d)}),
-            status: async (id, s) => fetch(`${Config.db}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:s})}),
+            add: async (d) => fetch(Config.db + ".json", {method:'POST', body:JSON.stringify(d)}),
+            active: async (id) => fetch(`${Config.db}/${id}.json`, {method:'PATCH', body:JSON.stringify({status:'active'})}),
             del: async (id) => fetch(`${Config.db}/${id}.json`, {method:'DELETE'})
         };
 
-        /* CONTROLE */
         const Admin = {
             check: () => {
-                if(sessionStorage.getItem('kbg_adm')) {
-                    Utils.$('adminBar').style.display = 'block';
+                if(sessionStorage.getItem('kb1_adm')) {
+                    Utils.$('adminBar').style.display='block';
                     return true;
                 } return false;
             },
             login: () => {
-                if(prompt("Senha:") === Config.pass) {
-                    sessionStorage.setItem('kbg_adm', 'true');
+                if(prompt("Senha Bibliotecário:") === Config.pass) {
+                    sessionStorage.setItem('kb1_adm','true');
                     location.reload();
                 }
             },
-            logout: () => { sessionStorage.removeItem('kbg_adm'); location.reload(); },
+            logout: () => { sessionStorage.removeItem('kb1_adm'); location.reload(); },
             
-            // Aprovar obra de usuário (vinda do pagamento da taxa)
             approve: async (id) => {
                 if(confirm("Confirmar Pix da Taxa e Publicar?")) {
-                    await Db.status(id, 'active');
+                    await Db.active(id);
                     App.load();
                 }
             }
         };
 
-        /* CORE */
         const App = {
-            items: [],
+            list: [],
             
             init: async () => {
                 Admin.check();
-                Visits.tick();
+                Visits.count();
                 await App.load();
             },
 
             load: async () => {
                 const grid = Utils.$('grid');
-                grid.innerHTML = '<div class="loader"></div>';
+                grid.innerHTML = '<div class="spinner"></div>';
                 
-                let list = await Db.list();
-                App.items = list; // Cache local
-                App.render();
-            },
-
-            // Sistema de Filtro
-            filter: (mode, el) => {
-                document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-                el.classList.add('active');
-                App.render(mode);
-            },
-
-            render: (filterMode = 'all') => {
-                const grid = Utils.$('grid');
-                grid.innerHTML = '';
+                let data = await Db.get();
+                App.list = data;
                 
+                const filter = Utils.$('filterType').value;
                 const isAdmin = Admin.check();
                 
-                // Filtros lógicos
-                let show = App.items.filter(b => {
-                    if(!isAdmin && b.status !== 'active') return false; // Público só vê ativo
+                // Filtro Seguro
+                let show = data.filter(b => {
+                    // Proteção contra dados corrompidos (Debug)
+                    if (!b || !b.title) return false; 
                     
-                    if(filterMode === 'all') return true;
-                    if(filterMode === 'community') return (b.origin !== 'admin');
-                    
-                    // Categorias
-                    return (b.category === filterMode);
+                    return b.status === 'active' || (isAdmin && b.status === 'pending');
                 });
+                
+                if(filter === 'khareis') show = show.filter(b => b.author && (b.author.toLowerCase().includes('khareis') || b.origin === 'admin'));
+                if(filter === 'community') show = show.filter(b => !b.author || (!b.author.toLowerCase().includes('khareis') && b.origin !== 'admin'));
 
-                if(show.length === 0) grid.innerHTML = '<p style="text-align:center; color:#999; grid-column:1/-1;">Estante vazia nesta seção.</p>';
+                grid.innerHTML = '';
+                
+                if(show.length === 0) grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999">Estante vazia.</p>';
 
-                show.sort((a,b) => b.createdAt - a.createdAt);
+                // Ordena seguro
+                show.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 show.forEach(b => {
-                    const isPending = b.status === 'pending';
-                    const price = parseFloat(b.salePrice);
-                    const tag = price > 0 ? Utils.money(price) : "GRÁTIS";
-                    const cls = price > 0 ? "paid" : "free";
+                    // Fallbacks de Debug (Se vier vazio, põe padrão)
+                    const title = b.title || "Sem Título";
+                    const author = b.author || "Anônimo";
                     const cover = b.cover || 'https://placehold.co/300x450?text=KhareisBook';
+                    
+                    const price = parseFloat(b.salePrice) || 0; // Se NaN vira 0
+                    const tag = price > 0 ? Utils.money(price) : "GRATUITO";
+                    const cls = price > 0 ? "t-paid" : "t-free";
+                    
+                    const isPending = b.status === 'pending';
 
-                    // Botão Admin sobre a capa
-                    let overlay = "";
+                    let adminUI = "";
                     if(isAdmin) {
-                        if(isPending) overlay = `<div style="position:absolute; inset:0; background:rgba(255,255,255,0.9); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:10;"><strong style="color:red">PENDENTE</strong><button onclick="event.stopPropagation();Admin.approve('${b.id}')" style="background:green; color:white; border:none; padding:5px; margin-top:5px; cursor:pointer;">APROVAR</button><button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px; margin-top:5px; cursor:pointer;">DELETAR</button></div>`;
-                        else overlay = `<button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="position:absolute; bottom:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; z-index:10;">X</button>`;
+                        if(isPending) adminUI = `<div style="position:absolute; inset:0; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:10px;"><strong style="color:red; font-size:0.8rem;">PENDENTE (Taxa R$10)</strong><button onclick="event.stopPropagation();Admin.approve('${b.id}')" style="background:green; color:white; border:none; padding:5px 10px; margin-top:5px; cursor:pointer;">APROVAR</button><button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px 10px; margin-top:5px; cursor:pointer;">REJEITAR</button></div>`;
+                        else adminUI = `<button onclick="event.stopPropagation();Db.del('${b.id}').then(App.load)" style="position:absolute; bottom:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer;">x</button>`;
                     }
 
-                    // Ação do Cartão
-                    const action = `Modal.details('${b.id}')`;
-
-                    const el = document.createElement('div');
-                    el.className = 'book';
-                    el.innerHTML = `
-                        <div class="cover-box" onclick="${action}">
-                            <span class="price-badge ${cls}">${tag}</span>
+                    const div = document.createElement('div');
+                    div.className = 'book';
+                    div.innerHTML = `
+                        <div class="cover-box" onclick="Modal.show('${b.id}')">
+                            <span class="price-tag ${cls}">${tag}</span>
                             <img src="${cover}" loading="lazy">
-                            ${overlay}
+                            ${adminUI}
                         </div>
-                        <div class="b-title">${b.title}</div>
-                        <div class="b-author">${b.author}</div>
-                        <button onclick="${action}" class="btn-card ${price>0?'card-buy':'card-get'}">
-                            ${price > 0 ? 'ADQUIRIR' : 'ACESSAR'}
+                        <div class="b-title">${title}</div>
+                        <div class="b-author">${author}</div>
+                        <button onclick="Modal.show('${b.id}')" class="btn-action ${price>0?'btn-pay':'btn-free'}">
+                            ${price>0 ? 'Adquirir' : 'Acessar'}
                         </button>
                     `;
-                    grid.appendChild(el);
+                    grid.appendChild(div);
                 });
             }
         };
 
-        /* LÓGICA DO FORMULÁRIO (USUÁRIO/ADMIN) */
         const Form = {
-            tmp: {},
-
+            data: {},
+            
             calc: () => {
                 const val = parseFloat(Utils.$('inpPrice').value) || 0;
                 if(val > 0) {
-                    Utils.$('financeBox').style.display = 'block';
-                    Utils.$('showPrice').innerText = Utils.money(val);
-                    Utils.$('showShare').innerText = Utils.money(val * 0.9); // 90%
+                    Utils.$('authPixBox').style.display = 'block';
+                    Utils.$('valAuth').innerText = Utils.money(val * 0.9);
+                    Utils.$('valPlat').innerText = Utils.money(val * 0.1);
                 } else {
-                    Utils.$('financeBox').style.display = 'none';
+                    Utils.$('authPixBox').style.display = 'none';
                 }
             },
 
             submit: async () => {
-                const isAdmin = Admin.check();
                 const title = Utils.$('inpTitle').value;
-                if(!title) return alert("Título é obrigatório.");
+                if(!title) return alert("Título obrigatório.");
+                
+                const file = Utils.$('inpCover').files[0];
+                const cover64 = await Utils.compress(file);
+                const isAdmin = Admin.check();
 
-                const f = Utils.$('inpCover').files[0];
-                const cover64 = await Utils.compress(f);
-
-                Form.tmp = {
-                    category: Utils.$('inpCat').value,
+                Form.data = {
                     title: title,
                     author: Utils.$('inpAuthor').value || "Anônimo",
                     desc: Utils.$('inpDesc').value,
                     link: Utils.$('inpLink').value,
-                    salePrice: Utils.$('inpPrice').value || 0,
-                    authorPix: Utils.$('inpPixKey').value || "",
                     cover: cover64,
+                    salePrice: parseFloat(Utils.$('inpPrice').value) || 0, // Proteção num
+                    authorPix: Utils.$('inpPixKey').value,
                     origin: isAdmin ? 'admin' : 'community',
-                    status: isAdmin ? 'active' : 'pending', // Admin vai direto
+                    status: isAdmin ? 'active' : 'pending',
                     createdAt: Date.now()
                 };
 
-                // Admin: Salva direto. User: Vai pra tela da taxa R$10
                 if(isAdmin) {
-                    await Db.save(Form.tmp);
-                    alert("Obra publicada com sucesso!");
-                    Modal.close(); App.load();
+                    await Db.add(Form.data);
+                    alert("Obra publicada!");
+                    location.reload();
                 } else {
-                    Modal.toFee(); // Tela de Taxa
+                    Utils.$('viewForm').style.display='none';
+                    Utils.$('viewFee').style.display='block';
                 }
             },
 
-            confirmUpload: async () => {
-                await Db.save(Form.tmp); // Salva como pending
-                const msg = `Olá! Acabei de cadastrar a obra "${Form.tmp.title}" e paguei a Taxa de Catalogação (R$ 10,00). Aguardo aprovação.`;
+            confirm: async () => {
+                await Db.add(Form.data); 
+                const msg = `Olá! Paguei a taxa de R$10 para publicar a obra: "${Form.data.title}". Aguardo aprovação.`;
                 window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-                Modal.close();
-                alert("Obra enviada! Assim que confirmarmos o pagamento da taxa, ela estará disponível.");
+                alert("Obra enviada! Aguarde a aprovação após o envio do comprovante.");
                 location.reload();
             }
         };
 
-        /* GERENCIADOR DE JANELAS */
         const Modal = {
             el: Utils.$('modal'),
-            
-            close: () => Modal.el.style.display = 'none',
+            close: () => Modal.el.style.display='none',
             
             openPub: () => {
-                Modal.el.style.display = 'flex';
-                Utils.$('screenUpload').style.display = 'block';
-                Utils.$('screenFee').style.display = 'none';
-                Utils.$('screenBuy').style.display = 'none';
-                Utils.$('screenBook').style.display = 'none';
+                Modal.el.style.display='flex';
+                Utils.$('viewForm').style.display='block';
+                Utils.$('viewFee').style.display='none';
+                Utils.$('viewBook').style.display='none';
+                Utils.$('viewBuy').style.display='none';
             },
 
-            toFee: () => {
-                Utils.$('screenUpload').style.display = 'none';
-                Utils.$('screenFee').style.display = 'block';
-            },
-
-            // Mostra os detalhes do livro
-
-
-
-            // Mostra os detalhes do livro
-            details: (id) => {
-                const b = App.items.find(i => i.id === id);
-                if(!b) return;
-
-                Modal.el.style.display = 'flex';
-                Utils.$('screenUpload').style.display = 'none';
-                Utils.$('screenFee').style.display = 'none';
-                Utils.$('screenBuy').style.display = 'none';
-                Utils.$('screenBook').style.display = 'block';
-
-                const price = parseFloat(b.salePrice);
-                let btn = "";
-                let adminPanel = "";
-
-                // PAINEL DO ADMIN (Agora mostra o Link para você enviar)
-                if(Admin.check()) {
-                    // Se for pago, mostra o financeiro e o link secreto
-                    if(price > 0) {
-                        adminPanel = `<div style="background:#fff7ed; padding:15px; border:2px solid #fdba74; font-size:0.85rem; margin-bottom:15px; text-align:left; border-radius:6px;">
-                            <strong>👮 PAINEL DE CONTROLE (Só vc vê):</strong><br>
-                            💰 Venda: ${Utils.money(price)} | Reter (10%): ${Utils.money(price*0.1)}<br>
-                            👉 <strong>Repassar Autor: ${Utils.money(price*0.9)}</strong><br>
-                            🔑 Pix do Autor: <code>${b.authorPix}</code><br>
-                            <hr style="margin:8px 0; border-color:#fed7aa">
-                            📂 <strong>Link para Entrega:</strong> <a href="${b.link}" target="_blank" style="color:#c2410c; text-decoration:underline; font-weight:bold;">ABRIR/COPIAR LINK</a>
-                            <br><small>(Copie este link e envie no Zap do cliente)</small>
-                        </div>`;
-                    } else {
-                        // Se for grátis, mostra botão de deletar rápido
-                        adminPanel = `<div style="text-align:right; margin-bottom:10px;"><button onclick="if(confirm('Apagar?')) Db.del('${b.id}').then(App.load)" style="background:red; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Apagar Obra</button></div>`;
-                    }
-                }
-
-                if(price > 0) {
-                    // Botão de COMPRA (Cliente)
-                    btn = `<button class="btn-main btn-pay" id="preBuyBtn"><i class="fas fa-shopping-cart"></i> ADQUIRIR (${Utils.money(price)})</button>`;
-                } else {
-                    // Botão de BAIXAR (Grátis)
-                    if(b.link) {
-                        btn = `<button onclick="window.open('${b.link}','_blank')" class="btn-main">⬇️ BAIXAR AGORA</button>`;
-                    } else {
-                        btn = `<button disabled class="btn-main" style="background:#ccc">LINK INDISPONÍVEL</button>`;
-                    }
-                }
-
-                Utils.$('bookDetailContent').innerHTML = `
-                    ${adminPanel}
-                    <img src="${b.cover}" style="height:220px; box-shadow:0 5px 20px rgba(0,0,0,0.3); border-radius:4px; margin-bottom:20px;">
-                    <h2 style="font-family:var(--serif); color:var(--deep); margin-bottom:5px;">${b.title}</h2>
-                    <p style="font-style:italic; color:#666; margin-bottom:20px;">Por ${b.author}</p>
-                    <p style="text-align:justify; line-height:1.6; color:#333; margin-bottom:25px;">${b.desc}</p>
-                    ${btn}
-                `;
-
-                if(price > 0) {
-                    Utils.$('preBuyBtn').onclick = () => Modal.toBuy(b);
-                }
-            },
-          
-
-
-	  // Tela Específica de Pagamento (Compra)
-            toBuy: (b) => {
-                Utils.$('screenBook').style.display = 'none';
-                Utils.$('screenBuy').style.display = 'block';
+            openBuy: (b) => {
+                Utils.$('viewBook').style.display='none';
+                Utils.$('viewBuy').style.display='block';
                 
-                Utils.$('buyCover').src = b.cover;
+                Utils.$('buyCover').src = b.cover || '';
                 Utils.$('buyTitle').innerText = b.title;
                 Utils.$('buyVal').innerText = Utils.money(parseFloat(b.salePrice));
                 
-                const msg = `Olá! Quero adquirir a obra "${b.title}" no valor de ${Utils.money(b.salePrice)}. Segue meu comprovante de pagamento.`;
+                const msg = `Olá! Quero adquirir a obra: "${b.title}". Valor: ${Utils.money(b.salePrice)}. Segue meu comprovante.`;
                 Utils.$('btnBuyConfirm').onclick = () => window.open(`https://wa.me/55${Config.pix.replace(/ /g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+            },
+
+            show: (id) => {
+                const b = App.list.find(x => x.id === id);
+                if(!b) return;
+                
+                Modal.el.style.display='flex';
+                Utils.$('viewForm').style.display='none';
+                Utils.$('viewFee').style.display='none';
+                Utils.$('viewBuy').style.display='none';
+                Utils.$('viewBook').style.display='block';
+
+                const price = parseFloat(b.salePrice) || 0;
+                let btnHtml = "";
+                let financial = "";
+
+                if(Admin.check() && price > 0) {
+                    financial = `<div style="background:#fffbeb; color:#92400e; padding:10px; margin-bottom:10px; text-align:left; font-size:0.8rem; border:1px solid #fcd34d;">
+                        <strong>👮 PAINEL FINANCEIRO ADMIN:</strong><br>
+                        💰 Total Venda: ${Utils.money(price)}<br>
+                        🦁 Reter (10%): ${Utils.money(price*0.1)}<br>
+                        👉 <strong>Repassar Autor: ${Utils.money(price*0.9)}</strong><br>
+                        Chave Pix: <code>${b.authorPix || 'Não informada'}</code><br>
+                        <hr style="margin:5px 0;opacity:0.5">
+                        📂 Link Arquivo: <a href="${b.link}" target="_blank" style="font-weight:bold;color:blue;">ABRIR</a>
+                    </div>`;
+                }
+
+                if(price > 0) {
+                    btnHtml = `<button id="btnPreBuy" class="btn-action" style="background:#25D366; color:white; font-size:1.1rem;"><i class="fab fa-whatsapp"></i> Comprar (${Utils.money(price)})</button>`;
+                } else {
+                    if(b.link) {
+                        btnHtml = `<button onclick="window.open('${b.link}','_blank')" class="btn-action btn-pay">⬇️ Baixar Agora</button>`;
+                    } else {
+                        btnHtml = `<button class="btn-action" disabled style="background:#ccc">Link Indisponível</button>`;
+                    }
+                }
+
+                Utils.$('bookDetails').innerHTML = `
+                    ${financial}
+                    <img src="${b.cover}" style="height:200px; border-radius:4px; box-shadow:0 5px 15px rgba(0,0,0,0.3); margin-bottom:15px;">
+                    <h3 style="color:var(--deep); margin-bottom:5px;">${b.title}</h3>
+                    <p style="color:#666; font-style:italic; margin-bottom:15px;">Por ${b.author}</p>
+                    <p style="text-align:justify; color:#333; line-height:1.6; margin-bottom:20px;">${b.desc}</p>
+                    ${btnHtml}
+                `;
+
+                if(price > 0) {
+                    Utils.$('btnPreBuy').onclick = () => Modal.openBuy(b);
+                }
             }
         };
 
         const Visits = {
-            tick: async () => {
-                const u = "https://khareisbook-default-rtdb.firebaseio.com/views.json";
+            count: async () => {
+                const url = Config.visitsUrl;
                 try {
-                    let r = await fetch(u); let d = await r.json();
-                    let n = (d || 1000);
-                    if(!sessionStorage.getItem('v')) { n++; fetch(u, {method:'PUT', body:n}); sessionStorage.setItem('v','1'); }
+                    let r = await fetch(url);
+                    let d = await r.json();
+                    
+                    // Debug [Object Object] Fix
+                    let n = 1000;
+                    if(typeof d === 'number') n = d;
+                    else if (d && d.visits) n = Number(d.visits);
+                    
+                    if(!sessionStorage.getItem('v_fix')) {
+                        n++;
+                        // Força salvar como objeto simples para garantir
+                        fetch(url, {method:'PUT', body:JSON.stringify({visits: n})});
+                        sessionStorage.setItem('v_fix', '1');
+                    }
                     Utils.$('visitCount').innerText = n;
-                } catch { Utils.$('visitCount').innerText = "1k+"; }
+                } catch { Utils.$('visitCount').innerText = "On"; }
             }
         };
 
         window.addEventListener('load', App.init);
     </script>
+
+	
 </body>
 </html>
