@@ -569,27 +569,52 @@
             }
         };
 
+/**
+         * CONTADOR DE VISITAS BLINDADO V2
+         */
         const Visits = {
+            // Nova rota para não conflitar com a pasta antiga bugada
+            url: "https://khareisbook-default-rtdb.firebaseio.com/contador_v2.json",
+
             count: async () => {
                 try {
-                    // Tenta criar/ler contador. Se der erro (null), começa do 1000
-                    let r = await fetch(Config.visitsUrl);
-                    let d = await r.json();
+                    const el = document.getElementById('visitCount');
                     
-                    let n = 1000;
-                    if(d && d.visits) n = Number(d.visits);
-                    
-                    // Lógica para contar 1 vez por sessão
-                    if(!sessionStorage.getItem('v_counted')) {
-                        n++;
-                        fetch(Config.visitsUrl, {method:'PUT', body:JSON.stringify({visits: n})});
-                        sessionStorage.setItem('v_counted', '1');
+                    // 1. Ler o valor atual no banco
+                    let response = await fetch(Visits.url);
+                    let valorAtual = await response.json();
+
+                    // 2. Se estiver vazio ou erro, define o marco inicial 1000
+                    let novoValor = 1000;
+                    if (valorAtual && !isNaN(valorAtual)) {
+                        novoValor = Number(valorAtual);
                     }
-                    Utils.$('visitCount').innerText = n;
-                } catch { Utils.$('visitCount').innerText = "On"; }
+
+                    // 3. Incrementa apenas se for uma nova sessão no navegador
+                    // Mudei a chave 'kb_v5' para forçar contagem nova pra você testar agora
+                    if (!sessionStorage.getItem('kb_v5')) {
+                        novoValor++; 
+                        
+                        // 4. Salva o NÚMERO PURO (sem chaves {}) para não bugar nunca mais
+                        await fetch(Visits.url, {
+                            method: 'PUT', 
+                            body: String(novoValor)
+                        });
+
+                        // Marca que esse visitante já foi contado hoje
+                        sessionStorage.setItem('kb_v5', 'true');
+                    }
+
+                    // 5. Exibe o resultado final
+                    if(el) el.innerText = novoValor.toLocaleString('pt-BR');
+
+                } catch (err) {
+                    console.error("Erro contador:", err);
+                    document.getElementById('visitCount').innerText = "1.000+";
+                }
             }
         };
-
+		
         window.addEventListener('load', App.init);
     </script>
 </body>
