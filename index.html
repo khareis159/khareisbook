@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -206,14 +207,23 @@
                 <label class="f-label">Link do Arquivo (PDF, Drive...)</label>
                 <input id="inpLink" class="f-input" placeholder="Cole aqui o link direto">
 
-                <label class="f-label" style="color:var(--deep)">Preço de Venda (Seu Lucro)</label>
-                <input id="inpPrice" type="number" class="f-input" placeholder="0 = Gratuito" onkeyup="Form.calc()">
+ 
+               <label class="f-label" style="color:var(--deep)">Preço de Venda (Para o Leitor)</label>
+                <input id="inpPrice" type="number" class="form-input" placeholder="0 = Gratuito" onkeyup="Form.calc()">
                 
-                <div id="financeBox" class="finance-panel" style="display:none;">
-                    <span>Venda: <strong id="showPrice">R$ 0,00</strong></span><br>
-                    <span>Sua Parte (90%): <strong id="showShare" style="font-size:1.1rem; color:#166534">R$ 0,00</strong></span>
+                <!-- PAINEL DE VENDA (Só aparece se Valor > 0) -->
+                <div id="authPixBox" class="info-box" style="display:none;">
+                    <span>Sua parte (90%): <strong id="valAuth">R$ 0,00</strong></span><br>
+                    <span>Comissão Khareis (10%): <strong id="valPlat">R$ 0,00</strong></span>
                     <input id="inpPixKey" class="f-input" placeholder="Sua Chave PIX para receber" style="margin-top:8px; background:white; border-color:#86efac;">
                 </div>
+
+                <!-- MENSAGEM GRÁTIS (Só aparece se Valor = 0) -->
+                <div id="freeMsgBox" class="info-box" style="display:none; background:#f1f5f9; border-color:#cbd5e1; color:#475569;">
+                    <i class="fas fa-info-circle"></i> Sua obra será disponibilizada <strong>gratuitamente</strong> para download assim que o administrador aprovar a catalogação.
+                </div>
+
+
 
                 <label class="f-label">Capa (Imagem Vertical)</label>
                 <input type="file" id="inpCover" accept="image/*" class="f-input">
@@ -419,16 +429,28 @@
       const Form = {
             tmp: {},
             
-            calc: () => {
+       calc: () => {
                 const val = parseFloat(Utils.$('inpPrice').value) || 0;
+                
+                // Elementos visuais
+                const boxVenda = Utils.$('authPixBox');
+                const boxGratis = Utils.$('freeMsgBox');
+
                 if(val > 0) {
-                    Utils.$('financeBox').style.display = 'block';
-                    Utils.$('showPrice').innerText = Utils.money(val);
-                    Utils.$('showShare').innerText = Utils.money(val * 0.9);
+                    // SE FOR VENDA: Mostra cálculo, esconde msg grátis
+                    boxVenda.style.display = 'block';
+                    boxGratis.style.display = 'none';
+                    
+                    Utils.$('valAuth').innerText = Utils.money(val * 0.9); // 90%
+                    Utils.$('valPlat').innerText = Utils.money(val * 0.1); // 10%
                 } else {
-                    Utils.$('financeBox').style.display = 'none';
+                    // SE FOR GRÁTIS: Mostra msg grátis, esconde cálculo
+                    boxVenda.style.display = 'none';
+                    boxGratis.style.display = 'block';
                 }
-            },
+            },  
+
+
 
             submit: async () => {
                 const title = Utils.$('inpTitle').value;
