@@ -552,18 +552,9 @@
                 if(price > 0) {
                     btn = `<button id="btnPreBuy" class="btn-main btn-pay"><i class="fas fa-shopping-cart"></i> ADQUIRIR (${Utils.money(price)})</button>`;
                 } else {
-
-
-if(b.link) {
-                        // Se o link for do IOFW, muda o texto para "Ir para a Fonte" em vez de Baixar
-                        if(b.link.includes("iofw")) {
-                             btn = `<button onclick="window.open('${b.link}','_blank')" class="btn-main" style="background:#8b5cf6">🔮 ACESSAR NA FONTE (IOFW)</button>`;
-                        } else {
-                             btn = `<button onclick="window.open('${b.link}','_blank')" class="btn-main">⬇️ BAIXAR AGORA</button>`;
-                        }
-                    }
-
-
+                    if(b.link) btn = `<button onclick="window.open('${b.link}','_blank')" class="btn-main">⬇️ BAIXAR AGORA</button>`;
+                    else btn = `<button disabled class="btn-main" style="background:#ccc">Indisponível</button>`;
+                }
 
                 Utils.$('bookDetailContent').innerHTML = `
                     ${adminInfo}
